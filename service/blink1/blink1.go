@@ -51,31 +51,31 @@ var colors = map[string]bool{
 }
 
 type Notification struct {
-	// Brightness
-	[]Brightness int
-	// color in multiple formats (hex, rgb, etc.) with pattern built in see blink1control-tool --list
-	[]Color string
-	// Delay between blinks
-	[]Delay int
-	// fade time
-	[]Fade int
-	// Glimmer number of times
-	[]Glimmer int
-	// Path to blink1control-tool
-	Path string
-	// Flash Random colors
-	[]Random int
-	// blink count
-	[]Repeats int
+    // Brightness
+    Brightness int
+    // color in multiple formats (hex, rgb, etc.) with pattern built in see blink1control-tool --list
+    Color string
+    // Delay between blinks
+    Delay int
+    // fade time
+    Fade int
+    // Glimmer number of times
+    Glimmer int
+    // Path to blink1control-tool
+    Path string
+    // Flash Random colors
+    Random int
+    // blink count
+    Repeats int
 }
 
 // Send triggers a blink1control notification.
 func (n *Notification) Send() error {
-	var args []string
-	if n.Brightness > 0 {
-		args = append(args, fmt.Sprintf("--%s", BRIGHTNESS))
-		args = append(args, fmt.Sprintf("%d", n.Brightness))
-	}
+    var args []string
+    if n.Brightness > 0 {
+        args = append(args, fmt.Sprintf("--%s", BRIGHTNESS))
+        args = append(args, fmt.Sprintf("%d", n.Brightness))
+    }
 	if n.Color != "" {
 		// if color is in the list of colors
 		if colors[n.Color] {
@@ -97,24 +97,24 @@ func (n *Notification) Send() error {
 		args = append(args, fmt.Sprintf("--%s", GLIMMER))
 		args = append(args, fmt.Sprintf("%d", n.Glimmer))
 	}
-	// if n.Path != "" {
-	// 	args = append(args, fmt.Sprintf("--%s %s", PATH, n.Path))
-	// }
-	if n.Random > 0 {
-		args = append(args, fmt.Sprintf("--%s", RANDOM))
-		args = append(args, fmt.Sprintf("%d", n.Random))
-	}
-	if n.Repeats != 0 {
-		args = append(args, fmt.Sprintf("--%s", REPEATS))
-		args = append(args, fmt.Sprintf("%d", n.Repeats))
-	}
+    if n.Random > 0 {
+        args = append(args, fmt.Sprintf("--%s", RANDOM))
+        args = append(args, fmt.Sprintf("%d", n.Random))
+    }
+    if n.Repeats != 0 {
+        args = append(args, fmt.Sprintf("--%s", REPEATS))
+        args = append(args, fmt.Sprintf("%d", n.Repeats))
+    }
 
-	args = append(args, "-q")
+    args = append(args, "-q")
 
-	cmd := exec.Command("blink1-tool", args...)
-	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("blink1-tool: command error: %v", err)
-	}
-	return nil
+    path := n.Path
+    if path == "" {
+        path = "blink1-tool"
+    }
+    cmd := exec.Command(path, args...)
+    if err := cmd.Run(); err != nil {
+        return fmt.Errorf("blink1-tool: %w", err)
+    }
+    return nil
 }

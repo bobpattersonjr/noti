@@ -18,7 +18,7 @@ import (
 )
 
 // Draft releases and prereleases are not returned by this endpoint.
-const githubReleasesURL = "https://api.github.com/repos/variadico/noti/releases/latest"
+const githubReleasesURL = "https://api.github.com/repos/bobpattersonjr/noti/releases/latest"
 
 // notification is the interface for all notifications.
 type notification interface {

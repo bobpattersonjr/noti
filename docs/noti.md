@@ -36,6 +36,7 @@ Noti can send notifications on a number of services.
 | Zulip      |   ✔   |   ✔   |    ✔    |
 | Twilio     |   ✔   |   ✔   |    ✔    |
 | GChat      |   ✔   |   ✔   |    ✔    |
+| Blink(1)   |   ✔   |   ✔   |    ✔    |
 | ntfy       |   ✔   |   ✔   |    ✔    |
 
 
@@ -55,10 +56,10 @@ If you don't want to build from source or install anything extra, just download 
 
 ```shell
 # macOS
-curl -L $(curl -s https://api.github.com/repos/variadico/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'darwin-amd64' | sed 's/"//g') | tar -xz
+curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'darwin-amd64' | sed 's/"//g') | tar -xz
 
 # Linux
-curl -L $(curl -s https://api.github.com/repos/variadico/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'linux-amd64' | sed 's/"//g') | tar -xz
+curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'linux-amd64' | sed 's/"//g') | tar -xz
 ```
 
 ## Options
@@ -77,6 +78,9 @@ curl -L $(curl -s https://api.github.com/repos/variadico/noti/releases/latest | 
     Trigger a banner notification.  This is enabled by default.  To disable
     this service, set this flag to false.  This will be either nsuser,
     freedesktop, or notifyicon notification, depending on the OS.
+
+-x, --blink1
+    Trigger a Blink(1) LED notification. Requires `blink1-tool` installed and available in PATH (or set `blink1.path`).
 
 -s, --speech
     Trigger a speech notification.  This will be either say, espeak, or
