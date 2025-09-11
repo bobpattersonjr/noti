@@ -1,6 +1,6 @@
 # noti
 
-![Testing](https://github.com/variadico/noti/actions/workflows/testing.yaml/badge.svg)
+![Testing](https://github.com/bobpattersonjr/noti/actions/workflows/testing.yaml/badge.svg)
 
 Monitor a process and trigger a notification.
 
@@ -103,6 +103,6 @@ $ make test 2>&1 | tail --lines 5 | noti -t "Test Results" -m -
 ```
 
 [macos banner notification]: https://raw.githubusercontent.com/variadico/noti/main/docs/screenshots/macos_banner.png
-[screenshots]: https://github.com/variadico/noti/tree/main/docs/screenshots
-[latest release]: https://github.com/variadico/noti/releases/latest
-[docs]: https://github.com/variadico/noti/blob/main/docs/noti.md
+[screenshots]: https://github.com/bobpattersonjr/noti/tree/main/docs/screenshots
+[latest release]: https://github.com/bobpattersonjr/noti/releases/latest
+[docs]: https://github.com/bobpattersonjr/noti/blob/main/docs/noti.md

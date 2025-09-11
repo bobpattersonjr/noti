@@ -6,7 +6,7 @@ This is the internal process I go through to release a version of Noti. I'm just
 
 Make sure latest dev is green on CI.
 
-https://github.com/variadico/noti/actions?query=workflow%3ATesting
+https://github.com/bobpattersonjr/noti/actions?query=workflow%3ATesting
 
 ## Increment version
 
@@ -28,7 +28,7 @@ git push origin master
 
 Make sure latest master is green on CI.
 
-https://github.com/variadico/noti/actions?query=workflow%3ATesting
+https://github.com/bobpattersonjr/noti/actions?query=workflow%3ATesting
 
 ## Double check
 
@@ -47,7 +47,7 @@ git push origin 1.2.3
 
 * Hopefully, when you pushed, GitHub Actions automatically created a release
   draft and uploaded tarballs
-* Go to https://github.com/variadico/noti/actions?query=workflow%3ARelease and
+* Go to https://github.com/bobpattersonjr/noti/actions?query=workflow%3ARelease and
   delete `noti.darwinrelease`, it's temporary junk. It's fine.
 * Add CHANGELOG notes to release body
 * Publish release

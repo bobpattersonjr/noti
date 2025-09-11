@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/variadico/noti/internal/command"
+	"github.com/bobpattersonjr/noti/internal/command"
 )
 
 func main() {

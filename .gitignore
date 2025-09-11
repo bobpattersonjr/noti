@@ -5,3 +5,7 @@ release/
 *.swp
 .noti.yaml
 !internal/command/testdata/.noti.yaml
+.devenv
+.vscode/
+flake.nix
+.envrc

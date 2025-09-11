@@ -45,7 +45,7 @@ The `master` branch always contains the latest tagged release.
 
 ```shell
 # Install the latest version on any platform.
-go get -u github.com/variadico/noti/cmd/noti
+go get -u github.com/bobpattersonjr/noti/cmd/noti
 
 # Install the latest version on macOS.
 brew install noti
@@ -505,7 +505,7 @@ To create token's expiration click on the ![Shield button](data:image/png;base64
 
 ## Reporting bugs
 
-Report bugs on GitHub at https://github.com/variadico/noti/issues.
+Report bugs on GitHub at https://github.com/bobpattersonjr/noti/issues.
 
 
 [Settings]: https://www.pushbullet.com/#settings

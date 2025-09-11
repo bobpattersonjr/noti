@@ -145,7 +145,7 @@ Receive your message from stdin with `-`.
 
 # REPORTING BUGS
 
-Report bugs on GitHub at https://github.com/variadico/noti/issues.
+Report bugs on GitHub at https://github.com/bobpattersonjr/noti/issues.
 
 # SEE ALSO
 

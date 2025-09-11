@@ -3,9 +3,9 @@ package command
 import (
 	"fmt"
 
+	"github.com/bobpattersonjr/noti/service/notifyicon"
+	"github.com/bobpattersonjr/noti/service/speechsynthesizer"
 	"github.com/spf13/viper"
-	"github.com/variadico/noti/service/notifyicon"
-	"github.com/variadico/noti/service/speechsynthesizer"
 )
 
 func getBanner(title, message string, v *viper.Viper) notification {

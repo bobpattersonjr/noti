@@ -16,11 +16,11 @@ ifeq ($(gobin),)
 gobin := $(shell go env GOPATH)/bin
 endif
 
-ldflags := -ldflags "-X github.com/variadico/noti/internal/command.Version=$(branch)-$(rev)"
-ldflags_rel := -ldflags "-s -w -X github.com/variadico/noti/internal/command.Version=$(tag)"
+ldflags := -ldflags "-X github.com/bobpattersonjr/noti/internal/command.Version=$(branch)-$(rev)"
+ldflags_rel := -ldflags "-s -w -X github.com/bobpattersonjr/noti/internal/command.Version=$(tag)"
 
 cmd/noti/noti: $(gosrc) vendor
-	go build -race -o $@ $(ldflags) github.com/variadico/noti/cmd/noti
+	go build -race -o $@ $(ldflags) github.com/bobpattersonjr/noti/cmd/noti
 
 vendor: go.mod go.sum
 	go mod tidy
@@ -30,21 +30,21 @@ vendor: go.mod go.sum
 release/noti.linuxrelease: $(gosrc) vendor
 	mkdir --parents release
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-		go build -o $@ $(ldflags_rel) github.com/variadico/noti/cmd/noti
+		go build -o $@ $(ldflags_rel) github.com/bobpattersonjr/noti/cmd/noti
 release/noti$(tag).linux-amd64.tar.gz: release/noti.linuxrelease
 	tar czvf $@ --transform 's#$<#noti#g' $<
 
 release/noti.darwinrelease: $(gosrc) vendor
 	mkdir -p release
 	GOOS=darwin GOARCH=amd64 \
-		go build -o $@ $(ldflags_rel) github.com/variadico/noti/cmd/noti
+		go build -o $@ $(ldflags_rel) github.com/bobpattersonjr/noti/cmd/noti
 release/noti$(tag).darwin-amd64.tar.gz: release/noti.darwinrelease
 	tar czvf $@ --transform 's#$<#noti#g' $<
 
 release/noti.windowsrelease: $(gosrc) vendor
 	mkdir --parents release
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
-		go build -o $@ $(ldflags_rel) github.com/variadico/noti/cmd/noti
+		go build -o $@ $(ldflags_rel) github.com/bobpattersonjr/noti/cmd/noti
 release/noti$(tag).windows-amd64.tar.gz: release/noti.windowsrelease
 	tar czvf $@ --transform 's#$<#noti.exe#g' $<
 
@@ -92,8 +92,8 @@ test:
 .PHONY: test-integration
 test-integration:
 	go install \
-		-ldflags "-X github.com/variadico/noti/internal/command.Version=$(branch)-$(rev)" \
-		github.com/variadico/noti/cmd/noti
+		-ldflags "-X github.com/bobpattersonjr/noti/internal/command.Version=$(branch)-$(rev)" \
+		github.com/bobpattersonjr/noti/cmd/noti
 	go test -v -cover ./tests/...
 
 .PHONY: clean
