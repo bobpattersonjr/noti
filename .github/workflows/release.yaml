@@ -65,9 +65,9 @@ jobs:
             out/*.darwin-amd64.tar.gz
           if-no-files-found: error
 
-  man-pages:
-    name: Build man pages
-    runs-on: ubuntu-latest
+  build-darwin-arm64:
+    name: Build macOS (darwin arm64)
+    runs-on: macos-14
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -75,23 +75,23 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Install pandoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
-      - name: Generate man pages
+      - name: Build release tarball (darwin arm64)
         run: |
-          make man
+          make 'out/noti$(tag).darwin-arm64.tar.gz'
 
-      - name: Upload man pages
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: man-pages
+          name: darwin-arm64-tarball
           path: |
-            docs/man/dist/noti.1
-            docs/man/dist/noti.yaml.5
+            out/*.darwin-arm64.tar.gz
           if-no-files-found: error
+
 
   publish:
     name: Publish GitHub release
@@ -99,7 +99,7 @@ jobs:
     needs:
       - build-linux-windows
       - build-darwin
-      - man-pages
+      - build-darwin-arm64
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -121,7 +121,5 @@ jobs:
           generate_release_notes: true
           files: |
             dist/**/*.tar.gz
-            dist/**/noti.1
-            dist/**/noti.yaml.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

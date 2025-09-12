@@ -26,6 +26,9 @@ out/noti: go.mod go.sum vendor $(go_src)
 out/noti.darwin.rel: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && GOOS=darwin GOARCH=amd64 \
 		go build -o ../../$@ $(ld_flags_rel)
+out/noti.darwin.arm64.rel: go.mod go.sum vendor $(go_src)
+	cd cmd/noti && GOOS=darwin GOARCH=arm64 \
+		go build -o ../../$@ $(ld_flags_rel)
 out/noti.%.rel: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && CGO_ENABLED=0 GOOS=$* GOARCH=amd64 \
 		go build -o ../../$@ $(ld_flags_rel)
@@ -38,6 +41,12 @@ out/noti$(tag).windows-amd64.tar.gz: out/noti.windows.rel
 	  rm -rf $$tmpdir
 out/noti$(tag).%-amd64.tar.gz: out/noti.%.rel
 	# Package binary as noti in tarball in a portable way (BSD/GNU tar)
+	@tmpdir=$$(mktemp -d); \
+	  cp $< $$tmpdir/noti; \
+	  tar -czf $@ -C $$tmpdir noti; \
+	  rm -rf $$tmpdir
+out/noti$(tag).darwin-arm64.tar.gz: out/noti.darwin.arm64.rel
+	# Package darwin arm64 binary in a portable way (BSD/GNU tar)
 	@tmpdir=$$(mktemp -d); \
 	  cp $< $$tmpdir/noti; \
 	  tar -czf $@ -C $$tmpdir noti; \
