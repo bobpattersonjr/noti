@@ -6,7 +6,8 @@ export GOFLAGS := -mod=vendor
 export GOPROXY := off
 
 branch := $(shell git rev-parse --abbrev-ref HEAD)
-tag := $(shell git describe --abbrev=0 --tags)
+# Suppress stderr for shallow clones to avoid fatal noise during Makefile parse.
+tag := $(shell git describe --abbrev=0 --tags 2>/dev/null || true)
 rev := $(shell git rev-parse --short HEAD)
 
 ld_flags_dev := -race -ldflags "-X github.com/bobpattersonjr/noti/internal/command.Version=$(branch)-$(rev)"

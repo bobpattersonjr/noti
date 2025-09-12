@@ -17,6 +17,9 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
     - name: Setup Go
       id: setup-go
       uses: actions/setup-go@v5
@@ -75,4 +78,6 @@ jobs:
           --enable gochecknoinits
           ./...
     - name: Test
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make test test-integration
