@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [3.8.2] - 2025-09-12
+
+### Added
+
+* Blink(1) LED notification service. New flag `-x, --blink1`, configuration keys under `blink1.*`, and corresponding `NOTI_BLINK1_*` environment variables.
+
+### Changed
+
+* `--version` output is more reliable: authenticates the GitHub API call when `GITHUB_TOKEN` is present and gracefully falls back when offline/rate‑limited while still showing a stable Download URL.
+* Release process migrated to GitHub Actions with improved packaging and multi‑arch support, including a native macOS arm64 tarball and portable tar creation across BSD/GNU environments.
+
+### Fixed
+
+* Addressed portability issues in release packaging (darwin tar behavior, Windows naming) and ensured tags are fetched properly during CI.
+
 ## [3.8.1] - 2025-09-12
 
 ### Added
@@ -276,7 +291,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * OS X-specific flags and usage text from Linux and FreeBSD help.
 
 
-[Unreleased]: https://github.com/variadico/noti/compare/3.8.1...main
+[Unreleased]: https://github.com/variadico/noti/compare/3.8.2...main
+[3.8.2]: https://github.com/variadico/noti/compare/3.8.1...3.8.2
 [3.8.1]: https://github.com/variadico/noti/compare/3.8.0...3.8.1
 [3.8.0]: https://github.com/variadico/noti/compare/3.7.0...3.8.0
 [3.7.0]: https://github.com/variadico/noti/compare/3.6.0...3.7.0
