@@ -102,6 +102,15 @@ release-no-cgo: out/noti$(tag).linux-amd64.tar.gz out/noti$(tag).windows-amd64.t
 .PHONY: release-darwin
 release-darwin: out/noti$(tag).darwin-amd64.tar.gz
 
+.PHONY: release-darwin-arm64
+release-darwin-arm64: out/noti$(tag).darwin-arm64.tar.gz
+
+.PHONY: release-linux
+release-linux: out/noti$(tag).linux-amd64.tar.gz
+
+.PHONY: release-windows
+release-windows: out/noti$(tag).windows-amd64.tar.gz
+
 .PHONY: man
 man: docs/man/dist/noti.1 docs/man/dist/noti.yaml.5
 
