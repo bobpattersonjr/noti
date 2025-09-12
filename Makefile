@@ -53,13 +53,17 @@ docs/man/dist/noti.yaml.5: docs/man/noti.yaml.5.md
 .PHONY: build
 build: out/noti
 
+
 .PHONY: lint
 lint: goos := $(strip $(shell go env GOOS))
-lint: golangci_lint := ./tools/golangci-lint-1.64.6-$(goos)-amd64
+lint: goarch := $(strip $(shell go env GOARCH))
+lint: golangci_local := $(if $(filter windows,$(goos)),./tools/golangci-lint-1.64.6-windows-amd64.exe,./tools/golangci-lint-1.64.6-$(goos)-amd64)
+lint: golangci_installed := $(shell go env GOBIN)/golangci-lint
 lint:
 	# Seems like there's some Windows bug with gofmt
 	go vet ./...
-	$(golangci_lint) run --no-config --exclude-use-default=false \
+	@if [ -x "$(golangci_local)" ] && [ "$(goarch)" = "amd64" ]; then \
+		"$(golangci_local)" run --no-config --exclude-use-default=false \
 		--max-same-issues=0 \
 		--timeout 60s \
 		--disable errcheck \
@@ -77,7 +81,32 @@ lint:
 		--enable prealloc \
 		--enable gocritic \
 		--enable gochecknoinits \
-		./...
+		./... ; \
+	elif [ -n "$(shell which go 2>/dev/null)" ]; then \
+		echo "Installing golangci-lint for $(goos)/$(goarch)..."; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6; \
+		"$(golangci_installed)" run --no-config --exclude-use-default=false \
+		--max-same-issues=0 \
+		--timeout 60s \
+		--disable errcheck \
+		--disable stylecheck \
+		--disable bodyclose \
+		--$(if $(filter windows,$(goos)),disable,enable) gofmt \
+		--$(if $(filter windows,$(goos)),disable,enable) goimports \
+		--enable unconvert \
+		--enable dupl \
+		--enable gocyclo \
+		--enable misspell \
+		--enable lll \
+		--enable unparam \
+		--enable nakedret \
+		--enable prealloc \
+		--enable gocritic \
+		--enable gochecknoinits \
+		./... ; \
+	else \
+		echo "Skipping golangci-lint: no suitable binary and unable to install"; \
+	fi
 
 .PHONY: test
 test:
