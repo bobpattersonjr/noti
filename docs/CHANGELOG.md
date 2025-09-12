@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [3.8.1] - 2025-09-12
+
+### Added
+
 * Add access token support for ntfy
 
 ## [3.8.0] - 2025-03-06
@@ -272,7 +276,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * OS X-specific flags and usage text from Linux and FreeBSD help.
 
 
-[Unreleased]: https://github.com/variadico/noti/compare/3.8.0...main
+[Unreleased]: https://github.com/variadico/noti/compare/3.8.1...main
+[3.8.1]: https://github.com/variadico/noti/compare/3.8.0...3.8.1
 [3.8.0]: https://github.com/variadico/noti/compare/3.7.0...3.8.0
 [3.7.0]: https://github.com/variadico/noti/compare/3.6.0...3.7.0
 [3.6.0]: https://github.com/variadico/noti/compare/3.5.0...3.6.0

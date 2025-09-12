@@ -34,14 +34,23 @@ out/noti.%.rel: go.mod go.sum vendor $(go_src)
 		go build -o ../../$@ $(ld_flags_rel)
 
 out/noti$(tag).windows-amd64.tar.gz: out/noti.windows.rel
-
-	tar czvf $@ --transform 's#$<#noti.exe#g' $<
+	# Package Windows binary as noti.exe in tarball in a portable way (BSD/GNU tar)
+	@tmpdir=$$(mktemp -d); \
+	  cp $< $$tmpdir/noti.exe; \
+	  tar -czf $@ -C $$tmpdir noti.exe; \
+	  rm -rf $$tmpdir
 out/noti$(tag).%-amd64.tar.gz: out/noti.%.rel
-
-	tar czvf $@ --transform 's#$<#noti#g' $<
+	# Package binary as noti in tarball in a portable way (BSD/GNU tar)
+	@tmpdir=$$(mktemp -d); \
+	  cp $< $$tmpdir/noti; \
+	  tar -czf $@ -C $$tmpdir noti; \
+	  rm -rf $$tmpdir
 out/noti$(tag).darwin-arm64.tar.gz: out/noti.darwin.arm64.rel
-
-	tar czvf $@ --transform 's#$<#noti#g' $<
+	# Package darwin arm64 binary in a portable way (BSD/GNU tar)
+	@tmpdir=$$(mktemp -d); \
+	  cp $< $$tmpdir/noti; \
+	  tar -czf $@ -C $$tmpdir noti; \
+	  rm -rf $$tmpdir
 
 docs/man/dist/noti.1: docs/man/noti.1.md
 	mkdir --parents $(dir $@)
@@ -121,6 +130,15 @@ release-no-cgo: out/noti$(tag).linux-amd64.tar.gz out/noti$(tag).windows-amd64.t
 
 .PHONY: release-darwin
 release-darwin: out/noti$(tag).darwin-amd64.tar.gz out/noti$(tag).darwin-arm64.tar.gz
+
+.PHONY: release-darwin-arm64
+release-darwin-arm64: out/noti$(tag).darwin-arm64.tar.gz
+
+.PHONY: release-linux
+release-linux: out/noti$(tag).linux-amd64.tar.gz
+
+.PHONY: release-windows
+release-windows: out/noti$(tag).windows-amd64.tar.gz
 
 .PHONY: man
 man: docs/man/dist/noti.1 docs/man/dist/noti.yaml.5
