@@ -1,4 +1,4 @@
-module github.com/variadico/noti
+module github.com/bobpattersonjr/noti
 
 go 1.24
 

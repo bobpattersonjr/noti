@@ -1,15 +1,17 @@
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 
+# Default to vendoring for builds, but avoid breaking tool installs
 export GOFLAGS := -mod=vendor
 export GOPROXY := off
 
 branch := $(shell git rev-parse --abbrev-ref HEAD)
-tag := $(shell git describe --abbrev=0 --tags)
+# Suppress stderr for shallow clones to avoid fatal noise during Makefile parse.
+tag := $(shell git describe --abbrev=0 --tags 2>/dev/null || true)
 rev := $(shell git rev-parse --short HEAD)
 
-ld_flags_dev := -race -ldflags "-X github.com/variadico/noti/internal/command.Version=$(branch)-$(rev)"
-ld_flags_rel := -ldflags "-s -w -X github.com/variadico/noti/internal/command.Version=$(tag)"
+ld_flags_dev := -race -ldflags "-X github.com/bobpattersonjr/noti/internal/command.Version=$(branch)-$(rev)"
+ld_flags_rel := -ldflags "-s -w -X github.com/bobpattersonjr/noti/internal/command.Version=$(tag)"
 
 go_src := $(shell find ./service ./internal ./cmd -name "*.go")
 
@@ -62,13 +64,19 @@ docs/man/dist/noti.yaml.5: docs/man/noti.yaml.5.md
 .PHONY: build
 build: out/noti
 
+
 .PHONY: lint
 lint: goos := $(strip $(shell go env GOOS))
-lint: golangci_lint := ./tools/golangci-lint-1.64.6-$(goos)-amd64
+lint: goarch := $(strip $(shell go env GOARCH))
+lint: gobin := $(strip $(shell go env GOBIN))
+lint: gopath := $(strip $(shell go env GOPATH))
+lint: golangci_local := $(if $(filter windows,$(goos)),./tools/golangci-lint-1.64.6-windows-amd64.exe,./tools/golangci-lint-1.64.6-$(goos)-amd64)
+lint: golangci_installed := $(if $(gobin),$(gobin),$(gopath)/bin)/golangci-lint$(if $(filter windows,$(goos)),.exe,)
 lint:
 	# Seems like there's some Windows bug with gofmt
 	go vet ./...
-	$(golangci_lint) run --no-config --exclude-use-default=false \
+	@if [ -x "$(golangci_local)" ] && [ "$(goarch)" = "amd64" ]; then \
+		"$(golangci_local)" run --no-config --exclude-use-default=false \
 		--max-same-issues=0 \
 		--timeout 60s \
 		--disable errcheck \
@@ -86,7 +94,33 @@ lint:
 		--enable prealloc \
 		--enable gocritic \
 		--enable gochecknoinits \
-		./...
+		./... ; \
+	elif [ -n "$(shell which go 2>/dev/null)" ]; then \
+		echo "Installing golangci-lint for $(goos)/$(goarch)..."; \
+		# Temporarily disable vendoring constraints for tool install
+		GOFLAGS= GOPROXY= GOWORK=off go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6; \
+		"$(golangci_installed)" run --no-config --exclude-use-default=false \
+		--max-same-issues=0 \
+		--timeout 60s \
+		--disable errcheck \
+		--disable stylecheck \
+		--disable bodyclose \
+		--$(if $(filter windows,$(goos)),disable,enable) gofmt \
+		--$(if $(filter windows,$(goos)),disable,enable) goimports \
+		--enable unconvert \
+		--enable dupl \
+		--enable gocyclo \
+		--enable misspell \
+		--enable lll \
+		--enable unparam \
+		--enable nakedret \
+		--enable prealloc \
+		--enable gocritic \
+		--enable gochecknoinits \
+		./... ; \
+	else \
+		echo "Skipping golangci-lint: no suitable binary and unable to install"; \
+	fi
 
 .PHONY: test
 test:
@@ -100,7 +134,7 @@ test-integration: out/noti
 release-no-cgo: out/noti$(tag).linux-amd64.tar.gz out/noti$(tag).windows-amd64.tar.gz
 
 .PHONY: release-darwin
-release-darwin: out/noti$(tag).darwin-amd64.tar.gz
+release-darwin: out/noti$(tag).darwin-amd64.tar.gz out/noti$(tag).darwin-arm64.tar.gz
 
 .PHONY: release-darwin-arm64
 release-darwin-arm64: out/noti$(tag).darwin-arm64.tar.gz

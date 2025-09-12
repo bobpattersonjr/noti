@@ -18,7 +18,7 @@ import (
 )
 
 // Draft releases and prereleases are not returned by this endpoint.
-const githubReleasesURL = "https://api.github.com/repos/variadico/noti/releases/latest"
+const githubReleasesURL = "https://api.github.com/repos/bobpattersonjr/noti/releases/latest"
 
 // notification is the interface for all notifications.
 type notification interface {
@@ -49,6 +49,7 @@ func InitFlags(flags *pflag.FlagSet) {
 	flags.BoolP("time", "e", false, "Show execution time in message.")
 
 	flags.BoolP("banner", "b", false, "Trigger a banner notification. This is enabled by default.")
+	flags.BoolP("blink1", "x", false, "Trigger a Blink(1) notification.")
 	flags.BoolP("speech", "s", false, "Trigger a speech notification.")
 	flags.BoolP("bearychat", "c", false, "Trigger a BearyChat notification.")
 	flags.Bool("keybase", false, "Trigger a Keybase notification.")
@@ -88,7 +89,10 @@ func rootMain(cmd *cobra.Command, args []string) error {
 	if showVer, _ := cmd.Flags().GetBool("version"); showVer {
 		fmt.Println("noti version", Version)
 		if latest, dl, err := latestRelease(githubReleasesURL); err != nil {
+			// Fallback so users (and CI) still get helpful info without network.
 			vbsPrintln("Failed get latest release:", err)
+			fmt.Println("Latest:", "unknown")
+			fmt.Println("Download:", "https://github.com/bobpattersonjr/noti/releases")
 		} else if latest != Version {
 			fmt.Println("Latest:", latest)
 			fmt.Println("Download:", dl)
@@ -174,7 +178,18 @@ func enabledTime(v *viper.Viper, flags *pflag.FlagSet) bool {
 func latestRelease(u string) (string, string, error) {
 	webClient := &http.Client{Timeout: 30 * time.Second}
 
-	resp, err := webClient.Get(u)
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return "", "", err
+	}
+	// Improve reliability in CI by authenticating when a token is available.
+	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
+		// GitHub accepts Bearer tokens for the REST API.
+		req.Header.Set("Authorization", "Bearer "+tok)
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	resp, err := webClient.Do(req)
 	if err != nil {
 		return "", "", err
 	}

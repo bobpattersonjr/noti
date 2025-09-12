@@ -1,6 +1,6 @@
 # noti
 
-![Testing](https://github.com/variadico/noti/actions/workflows/testing.yaml/badge.svg)
+![Testing](https://github.com/bobpattersonjr/noti/actions/workflows/testing.yaml/badge.svg)
 
 Monitor a process and trigger a notification.
 
@@ -44,10 +44,10 @@ Install the Go binary with these commands.
 brew install noti
 
 # macOS install with curl
-curl -L $(curl -s https://api.github.com/repos/variadico/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'darwin-amd64' | sed 's/"//g') | tar -xz
+curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'darwin-amd64' | sed 's/"//g') | tar -xz
 
 # Linux install with curl
-curl -L $(curl -s https://api.github.com/repos/variadico/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'linux-amd64' | sed 's/"//g') | tar -xz
+curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/latest | awk '/browser_download_url/ { print $2 }' | grep 'linux-amd64' | sed 's/"//g') | tar -xz
 ```
 
 Or download it with your browser from the [latest release] page.
@@ -102,7 +102,7 @@ Additionally, `noti` can send a message piped from stdin with `-`.
 $ make test 2>&1 | tail --lines 5 | noti -t "Test Results" -m -
 ```
 
-[macos banner notification]: https://raw.githubusercontent.com/variadico/noti/main/docs/screenshots/macos_banner.png
-[screenshots]: https://github.com/variadico/noti/tree/main/docs/screenshots
-[latest release]: https://github.com/variadico/noti/releases/latest
-[docs]: https://github.com/variadico/noti/blob/main/docs/noti.md
+[macos banner notification]: https://raw.githubusercontent.com/bobpattersonjr/noti/main/docs/screenshots/macos_banner.png
+[screenshots]: https://github.com/bobpattersonjr/noti/tree/main/docs/screenshots
+[latest release]: https://github.com/bobpattersonjr/noti/releases/latest
+[docs]: https://github.com/bobpattersonjr/noti/blob/main/docs/noti.md

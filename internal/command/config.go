@@ -35,6 +35,15 @@ var baseDefaults = map[string]interface{}{
 
 	"bearychat.incomingHookURI": "",
 
+	"blink1.brightness": 0,
+	"blink1.color":      "FF0000",
+	"blink1.delay":      0,
+	"blink1.fade":       0,
+	"blink1.glimmer":    0,
+	"blink1.path":       "blink1-tool",
+	"blink1.random":     0,
+	"blink1.repeats":    3,
+
 	"keybase.conversation":      "",
 	"keybase.channel":           "",
 	"keybase.public":            "",
@@ -108,6 +117,15 @@ var keyEnvBindings = map[string]string{
 	"speechsynthesizer.voice": "NOTI_SPEECHSYNTHESIZER_VOICE",
 
 	"bearychat.incomingHookURI": "NOTI_BEARYCHAT_INCOMINGHOOKURI",
+
+	"blink1.color":      "NOTI_BLINK1_COLOR",
+	"blink1.brightness": "NOTI_BLINK1_BRIGHTNESS",
+	"blink1.delay":      "NOTI_BLINK1_DELAY",
+	"blink1.fade":       "NOTI_BLINK1_FADETIME",
+	"blink1.glimmer":    "NOTI_BLINK1_GLIMMER",
+	"blink1.path":       "NOTI_BLINK1_PATH",
+	"blink1.random":     "NOTI_BLINK1_RANDOM",
+	"blink1.repeats":    "NOTI_BLINK1_REPEATS",
 
 	"keybase.conversation":      "NOTI_KEYBASE_CONVERSATION",
 	"keybase.channel":           "NOTI_KEYBASE_CHANNEL",
@@ -276,6 +294,7 @@ func enabledFromSlice(defaults []string) map[string]bool {
 	services := map[string]bool{
 		"banner":     false,
 		"bearychat":  false,
+		"blink1":     false,
 		"keybase":    false,
 		"pushbullet": false,
 		"pushover":   false,
@@ -308,6 +327,7 @@ func hasServiceFlags(flags *pflag.FlagSet) bool {
 	services := map[string]bool{
 		"banner":     false,
 		"bearychat":  false,
+		"blink1":     false,
 		"keybase":    false,
 		"pushbullet": false,
 		"pushover":   false,
@@ -343,6 +363,7 @@ func enabledFromFlags(flags *pflag.FlagSet) map[string]bool {
 	services := map[string]bool{
 		"banner":     false,
 		"bearychat":  false,
+		"blink1":     false,
 		"keybase":    false,
 		"pushbullet": false,
 		"pushover":   false,
@@ -408,6 +429,10 @@ func getNotifications(v *viper.Viper, services map[string]struct{}) []notificati
 
 	if _, ok := services["banner"]; ok {
 		notis = append(notis, getBanner(title, message, v))
+	}
+
+	if _, ok := services["blink1"]; ok {
+		notis = append(notis, getBlink1(title, message, v))
 	}
 
 	if _, ok := services["speech"]; ok {
