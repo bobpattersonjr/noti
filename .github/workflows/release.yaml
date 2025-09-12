@@ -38,8 +38,9 @@ jobs:
           if-no-files-found: error
 
   build-darwin:
-    name: Build macOS (darwin)
-    runs-on: macos-latest
+    name: Build macOS (darwin amd64)
+    # Use Intel runner so CGO works with import "C" when targeting amd64
+    runs-on: macos-13
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
