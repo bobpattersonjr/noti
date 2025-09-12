@@ -26,6 +26,9 @@ out/noti: go.mod go.sum vendor $(go_src)
 out/noti.darwin.rel: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && GOOS=darwin GOARCH=amd64 \
 		go build -o ../../$@ $(ld_flags_rel)
+out/noti.darwin.arm64.rel: go.mod go.sum vendor $(go_src)
+	cd cmd/noti && GOOS=darwin GOARCH=arm64 \
+		go build -o ../../$@ $(ld_flags_rel)
 out/noti.%.rel: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && CGO_ENABLED=0 GOOS=$* GOARCH=amd64 \
 		go build -o ../../$@ $(ld_flags_rel)
@@ -34,6 +37,9 @@ out/noti$(tag).windows-amd64.tar.gz: out/noti.windows.rel
 
 	tar czvf $@ --transform 's#$<#noti.exe#g' $<
 out/noti$(tag).%-amd64.tar.gz: out/noti.%.rel
+
+	tar czvf $@ --transform 's#$<#noti#g' $<
+out/noti$(tag).darwin-arm64.tar.gz: out/noti.darwin.arm64.rel
 
 	tar czvf $@ --transform 's#$<#noti#g' $<
 
@@ -85,7 +91,7 @@ test-integration: out/noti
 release-no-cgo: out/noti$(tag).linux-amd64.tar.gz out/noti$(tag).windows-amd64.tar.gz
 
 .PHONY: release-darwin
-release-darwin: out/noti$(tag).darwin-amd64.tar.gz
+release-darwin: out/noti$(tag).darwin-amd64.tar.gz out/noti$(tag).darwin-arm64.tar.gz
 
 .PHONY: man
 man: docs/man/dist/noti.1 docs/man/dist/noti.yaml.5
@@ -93,4 +99,3 @@ man: docs/man/dist/noti.1 docs/man/dist/noti.yaml.5
 .PHONY: update-go-mod
 update-go-mod:
 	GOPROXY= go get -u ./service/... ./internal/... ./cmd/...
-
