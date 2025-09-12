@@ -24,5 +24,55 @@ jobs:
         go-version-file: go.mod
     - name: Build
       run: make build
+    - name: Lint (non-Windows)
+      if: runner.os != 'Windows'
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.64.6
+        args: >-
+          --no-config --exclude-use-default=false
+          --max-same-issues=0
+          --timeout 60s
+          --disable errcheck
+          --disable stylecheck
+          --disable bodyclose
+          --enable gofmt
+          --enable goimports
+          --enable unconvert
+          --enable dupl
+          --enable gocyclo
+          --enable misspell
+          --enable lll
+          --enable unparam
+          --enable nakedret
+          --enable prealloc
+          --enable gocritic
+          --enable gochecknoinits
+          ./...
+    - name: Lint (Windows)
+      if: runner.os == 'Windows'
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.64.6
+        args: >-
+          --no-config --exclude-use-default=false
+          --max-same-issues=0
+          --timeout 60s
+          --disable errcheck
+          --disable stylecheck
+          --disable bodyclose
+          --disable gofmt
+          --disable goimports
+          --enable unconvert
+          --enable dupl
+          --enable gocyclo
+          --enable misspell
+          --enable lll
+          --enable unparam
+          --enable nakedret
+          --enable prealloc
+          --enable gocritic
+          --enable gochecknoinits
+          ./...
     - name: Test
-      run: make lint test test-integration
+      run: make test test-integration

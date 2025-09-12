@@ -1,6 +1,7 @@
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 
+# Default to vendoring for builds, but avoid breaking tool installs
 export GOFLAGS := -mod=vendor
 export GOPROXY := off
 
@@ -66,8 +67,10 @@ build: out/noti
 .PHONY: lint
 lint: goos := $(strip $(shell go env GOOS))
 lint: goarch := $(strip $(shell go env GOARCH))
+lint: gobin := $(strip $(shell go env GOBIN))
+lint: gopath := $(strip $(shell go env GOPATH))
 lint: golangci_local := $(if $(filter windows,$(goos)),./tools/golangci-lint-1.64.6-windows-amd64.exe,./tools/golangci-lint-1.64.6-$(goos)-amd64)
-lint: golangci_installed := $(shell go env GOBIN)/golangci-lint
+lint: golangci_installed := $(if $(gobin),$(gobin),$(gopath)/bin)/golangci-lint$(if $(filter windows,$(goos)),.exe,)
 lint:
 	# Seems like there's some Windows bug with gofmt
 	go vet ./...
@@ -93,7 +96,8 @@ lint:
 		./... ; \
 	elif [ -n "$(shell which go 2>/dev/null)" ]; then \
 		echo "Installing golangci-lint for $(goos)/$(goarch)..."; \
-		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6; \
+		# Temporarily disable vendoring constraints for tool install
+		GOFLAGS= GOPROXY= GOWORK=off go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6; \
 		"$(golangci_installed)" run --no-config --exclude-use-default=false \
 		--max-same-issues=0 \
 		--timeout 60s \
