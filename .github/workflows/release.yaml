@@ -108,7 +108,10 @@ jobs:
 
       - name: List files
         run: |
-          ls -lah dist
+          echo "Listing downloaded artifacts:"
+          ls -lah dist || true
+          echo "Recursive listing:"
+          find dist -type f -maxdepth 4 -print || true
 
       - name: Publish release and upload assets
         uses: softprops/action-gh-release@v2
@@ -116,8 +119,8 @@ jobs:
           draft: false
           generate_release_notes: true
           files: |
-            dist/out/*.tar.gz
-            dist/docs/man/dist/noti.1
-            dist/docs/man/dist/noti.yaml.5
+            dist/**/*.tar.gz
+            dist/**/noti.1
+            dist/**/noti.yaml.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
