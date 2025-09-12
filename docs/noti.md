@@ -38,6 +38,7 @@ Noti can send notifications on a number of services.
 | GChat      |   ✔   |   ✔   |    ✔    |
 | Blink(1)   |   ✔   |   ✔   |    ✔    |
 | ntfy       |   ✔   |   ✔   |    ✔    |
+| Bark       |   ✔   |   ✔   |    ✔    |
 
 
 ## Installation
@@ -129,7 +130,11 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 
 --ntfy
     Trigger a ntfy notification.  This requires `ntfy.topic` be set.  Optionally, 
-    `ntfy.url` can also be set to use a different ntfy server.
+    `ntfy.url` can also be set to use a different ntfy server. For private Ntfy topics, access token authentication can be provided via `ntfy.token`.
+
+--bark
+    Trigger a Bark notification.  This requires `bark.key` to be set. Optionally, 
+    `bark.apiurl` can also be set to use a different bark server.
 
 -w , --pwatch
     Monitor a process by PID and trigger a notification when the pid
@@ -163,6 +168,7 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 * `NOTI_KEYBASE_EXPLODINGLIFETIME`
 * `NOTI_NTFY_TOPIC`
 * `NOTI_NTFY_URL`
+* `NOTI_NTFY_TOKEN`
 * `NOTI_PUSHBULLET_ACCESSTOKEN`
 * `NOTI_PUSHBULLET_DEVICEIDEN`
 * `NOTI_PUSHOVER_APITOKEN`
@@ -186,6 +192,8 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 * `NOTI_CHANIFY_SOUND`
 * `NOTI_CHANIFY_PRIORITY`
 * `NOTI_CHANIFY_INTERUPTIONLEVEL`
+* `NOTI_BARK_KEY`
+* `NOTI_BARK_APIURL`
 
 
 ## Files
@@ -357,6 +365,17 @@ url
 
 topic
     Topic ID to send messages to
+    
+token
+    [Bearer access token](https://docs.ntfy.sh/publish/#access-tokens) for authentication on private topics. 
+
+Bark
+
+apiurl
+    Bark server URL. Defaults to https://api.day.app/push
+
+key
+    Device Key to send messages to
 
 ```
 
@@ -437,7 +456,11 @@ chanify:
   interruptionLevel: 'active'
 ntfy:
   url: https://my.ntfy.url.com
+  token: ''
   topic: 'xxxxxxxxxxxxxxxx'
+bark:
+  url: https://my.bark.url.com
+  key: '1234567890abcdefg'
 ```
 
 ## Setting up cloud accounts
@@ -506,6 +529,11 @@ Configure a Google Spaces webhook (see [setting up webhooks](https://developers.
 
 Open up Chanify on your device, pick a channel and create a token. You have an option of token with best-by date or token with no expiration. Set the token as `chanify.channelURL` with the default host `api.chanify.net`. Your `chanify.channelURL` should look like this: `https://api.chanify.net/v1/sender/<TOKEN>`
 To create token's expiration click on the ![Shield button](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAcCAYAAACdz7SqAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAHaADAAQAAAABAAAAHAAAAADjGz/hAAADAklEQVRIDeVVTShEURT+5keJkgXSFJlSFhSRNNlYkGLBLDVFWVIaYaMkpSibWdhZMQ2JjYWIMpOiJguUn2k2itUsSKKmEcc9J2+aN97MvEnZOPV6752/75x77/muBQCp50/F+qdo32D/B9Sez/LW1NSgq6sLjY2NeHx8RCgUwsnJCRKJRD5pYFHeWQ9SVVUVenp65Kmrq5PkT09PKCkpgd1ux+vrKyYnJwX8/f3dFLghaGFhIfr6+uB2u9HU1CSJYrEYDg4OsLe3h/PzcwHt7u5Gb28v2tra8PLygv39fWxubuL6+jonOHeqewKBAEUiETo+Pqbp6Wlqbm4mi8Wi80mN8Xg8tLa2Rjc3N3R7e0sdHR0Zfb/j9ICs5EC/309WqzVXsM7OxXGx4+PjOn1qgfxtODKqKzw/P+Pz81P5ZBdVGJxOpzjxXrNwfDbJ6/QaJRocHJTTe3d3Z2Q21P0KlEfI6/WipaVFkptZGXY0XF7D8tKUvKyLi4uylB8fH2nW7L+mQPv7+8HzmirDw8MyTj6fL6nmQsxITi+e2bm5OaiRQFlZmeSsra3F2NgYzs7OsLq6agZH55MRVKs6Ho9DzSoqKyuxvLyMoqIiLCwsgNmH9an7qMUQ8cRkFsODxNSmdcWhu7u7cDgcmJiYwM7Ojiz1zMwMHh4edJnLy8vl/+3tTadP/zHsNBqNoqGhQbrTAlZWVrC+vi6ATPRbW1uaKfnu7OyUb47PJT/YQ/GuMIvaL1J7mrQzFTLrpOpUcrG3t7fT1dUVHR4eUkFBQTJGs6e9f9IgJ19aWhLg7e1tqq6uzppkaGhIAC8uLkhde1l9v8F/grLBZrPR1NSU8PDl5SWNjIwYdlhfXy/FBYNBUltiBpB9jEE1fWtrK6nrTBIfHR2RusoksTpoND8/LzfL7OwsFRcXmwUkZmZBZvRMwpf1wMAARkdHUVpaivv7e1RUVIBn+PT0FEwU+YrpCrkbRQoUDodpY2ODXC6X6VhVVNLXVKf5dpHL33BOcwX91v5/QL8AnJm6qDdN5A0AAAAASUVORK5CYII=) Shield button
+
+### Bark
+
+Open the Bark APP and copy the test URL like `https://api.day.app/your_key` (see [Bark tutorial](https://bark.day.app/#/en-us/tutorial)).
+Next, fill `your_key` in `bark.key` to.
 
 ## Reporting bugs
 

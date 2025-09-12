@@ -1,26 +1,27 @@
 package command
 
 import (
-	"fmt"
-	"html"
-	"net/http"
-	"time"
+    "fmt"
+    "html"
+    "net/http"
+    "time"
 
-	"github.com/bobpattersonjr/noti/service/bearychat"
-	"github.com/bobpattersonjr/noti/service/chanify"
-	"github.com/bobpattersonjr/noti/service/gchat"
-	"github.com/bobpattersonjr/noti/service/keybase"
-	"github.com/bobpattersonjr/noti/service/mattermost"
-	"github.com/bobpattersonjr/noti/service/ntfy"
-	"github.com/bobpattersonjr/noti/service/pushbullet"
-	"github.com/bobpattersonjr/noti/service/pushover"
-	"github.com/bobpattersonjr/noti/service/pushsafer"
-	"github.com/bobpattersonjr/noti/service/simplepush"
-	"github.com/bobpattersonjr/noti/service/slack"
-	"github.com/bobpattersonjr/noti/service/telegram"
-	"github.com/bobpattersonjr/noti/service/twilio"
-	"github.com/bobpattersonjr/noti/service/zulip"
-	"github.com/spf13/viper"
+    "github.com/bobpattersonjr/noti/service/bark"
+    "github.com/bobpattersonjr/noti/service/bearychat"
+    "github.com/bobpattersonjr/noti/service/chanify"
+    "github.com/bobpattersonjr/noti/service/gchat"
+    "github.com/bobpattersonjr/noti/service/keybase"
+    "github.com/bobpattersonjr/noti/service/mattermost"
+    "github.com/bobpattersonjr/noti/service/ntfy"
+    "github.com/bobpattersonjr/noti/service/pushbullet"
+    "github.com/bobpattersonjr/noti/service/pushover"
+    "github.com/bobpattersonjr/noti/service/pushsafer"
+    "github.com/bobpattersonjr/noti/service/simplepush"
+    "github.com/bobpattersonjr/noti/service/slack"
+    "github.com/bobpattersonjr/noti/service/telegram"
+    "github.com/bobpattersonjr/noti/service/twilio"
+    "github.com/bobpattersonjr/noti/service/zulip"
+    "github.com/spf13/viper"
 )
 
 var httpClient = &http.Client{Timeout: 30 * time.Second}
@@ -184,9 +185,20 @@ func getChanify(title, message string, v *viper.Viper) notification {
 func getNtfy(title, message string, v *viper.Viper) notification {
 	return &ntfy.Notification{
 		URL:     v.GetString("ntfy.url"),
+		Token:   v.GetString("ntfy.token"),
 		Topic:   v.GetString("ntfy.topic"),
 		Title:   title,
 		Message: message,
 		Client:  httpClient,
+	}
+}
+
+func getBark(title, message string, v *viper.Viper) notification {
+	return &bark.Notification{
+		URL:       v.GetString("bark.apiurl"),
+		DeviceKey: v.GetString("bark.key"),
+		Title:     title,
+		Body:      message,
+		Client:    httpClient,
 	}
 }

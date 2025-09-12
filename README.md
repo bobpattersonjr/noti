@@ -30,6 +30,8 @@ Noti can send notifications on a number of services.
 | Twilio     |   ✔   |   ✔   |    ✔    |
 | GChat      |   ✔   |   ✔   |    ✔    |
 | Chanify    |   ✔   |   ✔   |    ✔    |
+| Bark       |   ✔   |   ✔   |    ✔    |
+| ntfy       |   ✔   |   ✔   |    ✔    |
 
 Check the [screenshots] directory to see what the notifications look like on different platforms.
 
@@ -57,8 +59,6 @@ If you want to build from the source, then build like this.
 ```shell
 # build binary
 make build
-# build binary and move to Go bin dir
-make install
 ```
 
 ## Examples
