@@ -133,6 +133,28 @@ numberFrom
 
 # GCHAT
 
+# WEBHOOK
+
+url
+: Destination webhook endpoint URL.
+
+method
+: HTTP method to use. Defaults to `POST`.
+
+contentType
+: Content-Type for the request when a body is sent. Defaults to `application/json`.
+
+template
+: Body template rendered with `title` and `message` fields, e.g.
+  `{"title":"{{.title}}","message":"{{.message}}"}`.
+
+headers
+: Map of additional headers to include in the request.
+
+webhooks
+: A list of webhook objects supporting the same fields as above. When present,
+  each item will be sent when the webhook service is enabled.
+
 appurl
 : This parameter defines the URL for the Google Chat webhook.
 
@@ -170,6 +192,24 @@ template
       event: 1234567890abcdefg
     slack:
       appurl: 'https://hooks.slack.com/services/xxx/yyy/zzz'
+    webhook:
+      url: 'https://example.com/webhook'
+      method: POST
+      contentType: application/json
+      template: '{"title":"{{.title}}","message":"{{.message}}"}'
+      headers:
+        X-Custom-Header: abc123
+    webhooks:
+      - url: 'https://hooks.example.com/one'
+        method: POST
+        contentType: application/json
+        template: '{"t":"{{.title}}","m":"{{.message}}"}'
+        headers:
+          Authorization: Bearer abc123
+      - url: 'https://hooks.example.com/two'
+        method: PUT
+        contentType: text/plain
+        template: '{{.title}}: {{.message}}'
     twilio:
       numberto: +972542877978
       numberfrom: +18111119711

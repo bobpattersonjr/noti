@@ -13,6 +13,7 @@ import (
 	"github.com/bobpattersonjr/noti/service/keybase"
 	"github.com/bobpattersonjr/noti/service/mattermost"
 	"github.com/bobpattersonjr/noti/service/ntfy"
+	"github.com/bobpattersonjr/noti/service/webhook"
 	"github.com/bobpattersonjr/noti/service/pushbullet"
 	"github.com/bobpattersonjr/noti/service/pushover"
 	"github.com/bobpattersonjr/noti/service/pushsafer"
@@ -194,11 +195,97 @@ func getNtfy(title, message string, v *viper.Viper) notification {
 }
 
 func getBark(title, message string, v *viper.Viper) notification {
-	return &bark.Notification{
-		URL:       v.GetString("bark.apiurl"),
-		DeviceKey: v.GetString("bark.key"),
-		Title:     title,
-		Body:      message,
-		Client:    httpClient,
-	}
+    return &bark.Notification{
+        URL:       v.GetString("bark.apiurl"),
+        DeviceKey: v.GetString("bark.key"),
+        Title:     title,
+        Body:      message,
+        Client:    httpClient,
+    }
+}
+
+// getWebhooks builds one or more webhook notifications from configuration.
+func getWebhooks(title, message string, v *viper.Viper) []notification {
+    // Prefer list form under top-level `webhooks:` if provided.
+    if raw := v.Get("webhooks"); raw != nil {
+        buildFromMap := func(m map[string]interface{}) *webhook.Notification {
+            // Headers conversion
+            headers := map[string]string{}
+            if hv, ok := m["headers"].(map[string]interface{}); ok {
+                for k, v := range hv {
+                    switch vv := v.(type) {
+                    case string:
+                        headers[k] = vv
+                    default:
+                        headers[k] = fmt.Sprint(vv)
+                    }
+                }
+            } else if hs, ok := m["headers"].(map[string]string); ok {
+                headers = hs
+            }
+
+            // String helpers with fallback to empty
+            s := func(key string) string {
+                if val, ok := m[key].(string); ok {
+                    return val
+                }
+                return ""
+            }
+
+            return &webhook.Notification{
+                URL:         s("url"),
+                Method:      s("method"),
+                Headers:     headers,
+                ContentType: s("contentType"),
+                Template:    s("template"),
+                Title:       title,
+                Message:     message,
+                Client:      httpClient,
+            }
+        }
+
+        // Case 1: explicitly set as []map[string]interface{}
+        if items, ok := raw.([]map[string]interface{}); ok && len(items) > 0 {
+            notis := make([]notification, 0, len(items))
+            for _, m := range items {
+                notis = append(notis, buildFromMap(m))
+            }
+            return notis
+        }
+        // Case 2: generic []interface{} slice containing maps
+        if items, ok := raw.([]interface{}); ok && len(items) > 0 {
+            notis := make([]notification, 0, len(items))
+            for _, it := range items {
+                m, ok := it.(map[string]interface{})
+                if !ok {
+                    continue
+                }
+                notis = append(notis, buildFromMap(m))
+            }
+            if len(notis) > 0 {
+                return notis
+            }
+        }
+    }
+
+    // Fallback to single webhook.* configuration.
+    return []notification{getWebhook(title, message, v)}
+}
+
+func getWebhook(title, message string, v *viper.Viper) notification {
+    headers := map[string]string{}
+    if m := v.GetStringMapString("webhook.headers"); len(m) > 0 {
+        headers = m
+    }
+
+    return &webhook.Notification{
+        URL:         v.GetString("webhook.url"),
+        Method:      v.GetString("webhook.method"),
+        Headers:     headers,
+        ContentType: v.GetString("webhook.contentType"),
+        Template:    v.GetString("webhook.template"),
+        Title:       title,
+        Message:     message,
+        Client:      httpClient,
+    }
 }

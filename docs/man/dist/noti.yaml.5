@@ -145,6 +145,29 @@ This parameter defines the URL for the Google Chat webhook.
 template
 This parameter defines the template combining the title and the message.
 The default is: `\f[I]{{.title}}\f[R]: {{.message}}'
+.SH WEBHOOK
+.TP
+url
+Destination webhook endpoint URL.
+.TP
+method
+HTTP method to use.
+Defaults to \f[CR]POST\f[R].
+.TP
+contentType
+Content\-Type for the request when a body is sent.
+Defaults to \f[CR]application/json\f[R].
+.TP
+template
+Body template rendered with \f[CR]title\f[R] and \f[CR]message\f[R] fields, e.g.
+\&\[lq]{\[dq]title\[dq]:\[dq]{{.title}}\[dq],\[dq]message\[dq]:\[dq]{{.message}}\[dq]}\[rq].
+.TP
+headers
+Map of additional headers to include in the request.
+.TP
+webhooks
+A list of webhook objects supporting the same fields as above.
+When present, each item will be sent when the webhook service is enabled.
 .SH EXAMPLES
 .IP
 .EX
@@ -176,6 +199,24 @@ simplepush:
   event: 1234567890abcdefg
 slack:
   appurl: \[aq]https://hooks.slack.com/services/xxx/yyy/zzz\[aq]
+webhook:
+  url: \[aq]https://example.com/webhook\[aq]
+  method: POST
+  contentType: application/json
+  template: \[aq]{\[dq]title\[dq]:\[dq]{{.title}}\[dq],\[dq]message\[dq]:\[dq]{{.message}}\[dq]}\[aq]
+  headers:
+    X\-Custom\-Header: abc123
+webhooks:
+  \- url: \[aq]https://hooks.example.com/one\[aq]
+    method: POST
+    contentType: application/json
+    template: \[aq]{\[dq]t\[dq]:\[dq]{{.title}}\[dq],\[dq]m\[dq]:\[dq]{{.message}}\[dq]}\[aq]
+    headers:
+      Authorization: Bearer abc123
+  \- url: \[aq]https://hooks.example.com/two\[aq]
+    method: PUT
+    contentType: text/plain
+    template: \[aq]{{.title}}: {{.message}}\[aq]
 twilio:
   numberto: +972542877978
   numberfrom: +18111119711

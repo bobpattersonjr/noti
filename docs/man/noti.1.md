@@ -70,6 +70,13 @@ when it's done. You can receive messages on your computer or phone.
 --ntfy
 : Trigger a ntfy notification.  This requires `ntfy.topic` be set.  Optionally, `ntfy.url` can also be set to use a different Ntfy server. For private Ntfy topics, access token authentication can be provided via `ntfy.token`. 
 
+--webhook
+: Trigger a generic Webhook notification. This requires `webhook.url` to be set.
+  Optionally, configure `webhook.method` (default: POST), `webhook.contentType`
+  (default: application/json), a `webhook.template` for the request body, and
+  `webhook.headers` as a key/value map. Multiple webhooks can be defined under
+  top-level `webhooks:`; all will be sent when the service is enabled.
+
 -w <pid>, \--pwatch <pid>
 : Monitor a process by PID and trigger a notification when the pid disappears.
 
@@ -115,6 +122,11 @@ when it's done. You can receive messages on your computer or phone.
 * `NOTI_TWILIO_FROM`
 * `NOTI_TWILIO_ACCOUNTSID`
 * `NOTI_TWILIO_AUTHTOKEN`
+* `NOTI_WEBHOOK_URL`
+* `NOTI_WEBHOOK_METHOD`
+* `NOTI_WEBHOOK_CONTENTTYPE`
+* `NOTI_WEBHOOK_TEMPLATE`
+* `NOTI_WEBHOOK_HEADERS` (comma-separated K=V list)
 
 
 # FILES
