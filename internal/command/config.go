@@ -24,6 +24,8 @@ var baseDefaults = map[string]interface{}{
 	"message":  "Done!",
 	"time":     false,
 
+	"banner.icon": "",
+
 	"nsuser.soundName":     "Ping",
 	"nsuser.soundNameFail": "Basso",
 
@@ -107,6 +109,8 @@ func setNotiDefaults(v *viper.Viper) {
 }
 
 var keyEnvBindings = map[string]string{
+	"banner.icon": "NOTI_BANNER_ICON",
+
 	"nsuser.soundName":     "NOTI_NSUSER_SOUNDNAME",
 	"nsuser.soundNameFail": "NOTI_NSUSER_SOUNDNAMEFAIL",
 
@@ -282,6 +286,10 @@ func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
 
 	if flags == nil {
 		return nil
+	}
+
+	if err := v.BindPFlag("banner.icon", flags.Lookup("icon")); err != nil {
+		return err
 	}
 
 	return v.BindPFlag("message", flags.Lookup("message"))

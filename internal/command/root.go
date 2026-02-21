@@ -49,6 +49,7 @@ func InitFlags(flags *pflag.FlagSet) {
 	flags.BoolP("time", "e", false, "Show execution time in message.")
 
 	flags.BoolP("banner", "b", false, "Trigger a banner notification. This is enabled by default.")
+	flags.String("icon", "", "Path to notification icon image.")
 	flags.BoolP("blink1", "x", false, "Trigger a Blink(1) notification.")
 	flags.BoolP("speech", "s", false, "Trigger a speech notification.")
 	flags.BoolP("bearychat", "c", false, "Trigger a BearyChat notification.")

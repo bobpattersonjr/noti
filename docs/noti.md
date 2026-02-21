@@ -80,8 +80,14 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
     this service, set this flag to false.  This will be either nsuser,
     freedesktop, or notifyicon notification, depending on the OS.
 
+--icon <string>
+    Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
+    accepts an image path or a freedesktop icon theme name. On Windows,
+    accepts an .ico file path.
+
 -x, --blink1
     Trigger a Blink(1) LED notification. Requires `blink1-tool` installed and available in PATH (or set `blink1.path`).
+
 
 -s, --speech
     Trigger a speech notification.  This will be either say, espeak, or
@@ -156,6 +162,7 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 ## Environment
 
 * `NOTI_DEFAULT`
+* `NOTI_BANNER_ICON`
 * `NOTI_NSUSER_SOUNDNAME`
 * `NOTI_NSUSER_SOUNDNAMEFAIL`
 * `NOTI_SAY_VOICE`
@@ -210,6 +217,13 @@ value and `noti` will check `$HOME/.config/noti/noti.yaml`.
 ## Configuration
 
 ```
+BANNER
+
+icon
+    Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
+    accepts an image path or a freedesktop icon theme name. On Windows,
+    accepts an .ico file path.
+
 NSUSER
 
 soundName
@@ -408,6 +422,8 @@ rsync -az --stats ~/  server:/backups/homedir | noti -t "backup stats" -m -
 Sample configuration file.
 
 ```yaml
+banner:
+  icon: /path/to/icon.png
 nsuser:
   soundName: Ping
   soundNameFail: Basso
