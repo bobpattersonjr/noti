@@ -29,8 +29,8 @@ when it's done. You can receive messages on your computer or phone.
   or `notifyicon` notification, depending on the OS.
 
 \--icon \<string\>
-: Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
-  accepts an image path or a freedesktop icon theme name. On Windows, accepts
+: Path to notification icon image. On Linux, accepts an image path or a
+  freedesktop icon theme name. Not supported on macOS. On Windows, accepts
   an .ico file path.
 
 -s, \--speech

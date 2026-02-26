@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - YYYY-MM-DD
 
+### Added
+
+* Custom icon support for banner notifications. New flag `--icon`, configuration key `banner.icon`, and `NOTI_BANNER_ICON` environment variable. Supported on Linux (freedesktop `AppIcon`) and Windows (`Icon`).
+
+### Changed
+
+* macOS banner notifications no longer use CGO. This removes the Objective-C bridge and the `nsuser_darwin.h` header, so darwin builds now cross-compile with `CGO_ENABLED=0`.
+* `--icon` / `banner.icon` has no effect on macOS. The `osascript display notification` mechanism does not support custom images; a warning is logged when an icon is set.
+
+### Fixed
+
+* macOS banner notifications work again on Ventura and later. Apple removed `NSUserNotification` in macOS 13, which caused banners to fail silently; they are now sent via `osascript display notification`.
+* ntfy requests no longer include `URL` and `Token` in the JSON body, which some ntfy servers rejected with a 400 "request body must be valid JSON".
+
 ## [3.8.2] - 2025-09-12
 
 ### Added

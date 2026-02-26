@@ -26,8 +26,8 @@ value and noti will check $HOME/.config/noti/noti.yaml.
 # BANNER
 
 icon
-: Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
-  accepts an image path or a freedesktop icon theme name. On Windows, accepts
+: Path to notification icon image. On Linux, accepts an image path or a
+  freedesktop icon theme name. Not supported on macOS. On Windows, accepts
   an .ico file path.
 
 # NSUSER

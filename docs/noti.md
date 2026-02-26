@@ -81,9 +81,9 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
     freedesktop, or notifyicon notification, depending on the OS.
 
 --icon <string>
-    Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
-    accepts an image path or a freedesktop icon theme name. On Windows,
-    accepts an .ico file path.
+    Path to notification icon image. On Linux, accepts an image path or a
+    freedesktop icon theme name. On Windows, accepts an .ico file path. Not
+    supported on macOS, where notifications are sent via osascript.
 
 -x, --blink1
     Trigger a Blink(1) LED notification. Requires `blink1-tool` installed and available in PATH (or set `blink1.path`).
@@ -220,9 +220,9 @@ value and `noti` will check `$HOME/.config/noti/noti.yaml`.
 BANNER
 
 icon
-    Path to notification icon image. On macOS, accepts PNG or JPEG. On Linux,
-    accepts an image path or a freedesktop icon theme name. On Windows,
-    accepts an .ico file path.
+    Path to notification icon image. On Linux, accepts an image path or a
+    freedesktop icon theme name. On Windows, accepts an .ico file path. Not
+    supported on macOS, where notifications are sent via osascript.
 
 NSUSER
 
