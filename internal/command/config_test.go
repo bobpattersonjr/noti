@@ -162,6 +162,7 @@ func TestConfigureApp(t *testing.T) {
 		name       string
 		configFile string
 		env        string
+		envValue   string
 		want       string
 	}{
 		{
@@ -171,11 +172,20 @@ func TestConfigureApp(t *testing.T) {
 			want:       "testSoundName",
 		},
 		{
-			// Env should take precedence.
+			// Config file should take precedence over env.
 			name:       "defaults, file, and env",
 			configFile: "testdata/noti.yaml",
 			env:        "NOTI_NSUSER_SOUNDNAME",
+			envValue:   "envSoundName",
 			want:       "testSoundName",
+		},
+		{
+			// Env should take precedence over defaults when the file
+			// doesn't set the key.
+			name:     "defaults and env",
+			env:      "NOTI_NSUSER_SOUNDNAME",
+			envValue: "envSoundName",
+			want:     "envSoundName",
 		},
 		{
 			// Defaults should take precedence.
@@ -199,7 +209,7 @@ func TestConfigureApp(t *testing.T) {
 				flags.Set("file", c.configFile)
 			}
 			if c.env != "" {
-				if err := os.Setenv(c.env, c.want); err != nil {
+				if err := os.Setenv(c.env, c.envValue); err != nil {
 					t.Errorf("Failed to set env: %s", err)
 				}
 			}
@@ -213,6 +223,89 @@ func TestConfigureApp(t *testing.T) {
 				t.Error("Unexpected config value")
 				t.Errorf("have=%s; want=%s", have, c.want)
 				t.Error("nsuser:", v.Sub("nsuser").AllSettings())
+			}
+		})
+	}
+}
+
+// TestConfigFilePrecedence pins the ordering that noti guarantees:
+// flags beat the config file, and the config file beats the environment.
+func TestConfigFilePrecedence(t *testing.T) {
+	orig := getNotiEnv(t)
+	defer setNotiEnv(t, orig)
+
+	cases := []struct {
+		name     string
+		key      string
+		env      string
+		envValue string
+		flag     string
+		flagVal  string
+		want     string
+	}{
+		{
+			name:     "file beats env",
+			key:      "nsuser.soundName",
+			env:      "NOTI_NSUSER_SOUNDNAME",
+			envValue: "envSoundName",
+			want:     "fileSoundName",
+		},
+		{
+			name:     "file beats env for banner.icon",
+			key:      "banner.icon",
+			env:      "NOTI_BANNER_ICON",
+			envValue: "/env/icon.png",
+			want:     "/file/icon.png",
+		},
+		{
+			name:    "flag beats file",
+			key:     "banner.icon",
+			flag:    "icon",
+			flagVal: "/flag/icon.png",
+			want:    "/flag/icon.png",
+		},
+		{
+			name:     "flag beats file and env",
+			key:      "banner.icon",
+			env:      "NOTI_BANNER_ICON",
+			envValue: "/env/icon.png",
+			flag:     "icon",
+			flagVal:  "/flag/icon.png",
+			want:     "/flag/icon.png",
+		},
+	}
+
+	for _, c := range cases {
+		// Pin case scope.
+		c := c
+
+		t.Run(c.name, func(t *testing.T) {
+			clearNotiEnv(t)
+
+			v := viper.New()
+			flags := pflag.NewFlagSet("testconfigfileprecedence", pflag.ContinueOnError)
+			InitFlags(flags)
+
+			if err := flags.Set("file", "testdata/noti-precedence.yaml"); err != nil {
+				t.Fatalf("Failed to set file flag: %s", err)
+			}
+			if c.env != "" {
+				if err := os.Setenv(c.env, c.envValue); err != nil {
+					t.Fatalf("Failed to set env: %s", err)
+				}
+			}
+			if c.flag != "" {
+				if err := flags.Set(c.flag, c.flagVal); err != nil {
+					t.Fatalf("Failed to set flag: %s", err)
+				}
+			}
+
+			if err := configureApp(v, flags); err != nil {
+				t.Fatal(err)
+			}
+
+			if have := v.GetString(c.key); have != c.want {
+				t.Errorf("%s: have=%s; want=%s", c.key, have, c.want)
 			}
 		})
 	}

@@ -203,8 +203,15 @@ var keyEnvBindingsDeprecated = map[string]string{
 	"NOTI_SLACK_CHANNEL":             "NOTI_SLACK_DEST",
 }
 
+// bindNotiEnv binds NOTI_* environment variables to config keys. It must run
+// after the config file is loaded: viper ranks env above config and the order
+// is fixed, so leaving a key unbound is the only way to let the file win.
 func bindNotiEnv(v *viper.Viper) error {
 	for key, val := range keyEnvBindings {
+		if v.InConfig(key) {
+			continue
+		}
+
 		if err := v.BindEnv(key, val); err != nil {
 			return err
 		}
@@ -273,15 +280,17 @@ func setupConfigFile(fileFlag string, v *viper.Viper) error {
 func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
 	setNotiDefaults(v)
 
-	if err := bindNotiEnv(v); err != nil {
-		return err
-	}
-
 	// Don't care about this error, fileFlag can be blank.
 	fileFlag, _ := flags.GetString("file")
 	if err := setupConfigFile(fileFlag, v); err != nil {
 		// Not the end of the world if we can't read the config file.
 		vbsPrintln(err)
+	}
+
+	// Must come after the config file is read, so that keys defined in the
+	// file are left unbound and the file's values win over the environment.
+	if err := bindNotiEnv(v); err != nil {
+		return err
 	}
 
 	if flags == nil {

@@ -92,6 +92,10 @@ when it's done. You can receive messages on your computer or phone.
 
 # ENVIRONMENT
 
+Environment variables are overridden by the configuration file and by command
+line flags. A variable only takes effect if the configuration file does not
+set the corresponding key. See **CONFIGURATION** in **noti.yaml**(5).
+
 * `NOTI_DEFAULT`
 * `NOTI_BANNER_ICON`
 * `NOTI_NSUSER_SOUNDNAME`

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* The configuration file now takes precedence over `NOTI_*` environment variables. Previously the environment overrode the file. Command line flags still override both, and environment variables still apply to keys the file does not set. If you rely on an environment variable to override a key in your `noti.yaml`, remove that key from the file.
 * macOS banner notifications no longer use CGO. This removes the Objective-C bridge and the `nsuser_darwin.h` header, so darwin builds now cross-compile with `CGO_ENABLED=0`.
 * `--icon` / `banner.icon` has no effect on macOS. The `osascript display notification` mechanism does not support custom images; a warning is logged when an icon is set.
 

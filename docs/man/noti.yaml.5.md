@@ -23,6 +23,18 @@ in the following order.
 If $XDG_CONFIG_HOME is empty, then $HOME/.config will be used as its default
 value and noti will check $HOME/.config/noti/noti.yaml.
 
+Settings are resolved in the following order, from highest precedence to
+lowest.
+
+1. Command line flags
+2. This configuration file
+3. Environment variables
+4. Built-in defaults
+
+A key set in this file overrides the corresponding `NOTI_*` environment
+variable. Precedence applies per key: environment variables still take effect
+for keys this file does not set. Command line flags override both.
+
 # BANNER
 
 icon
