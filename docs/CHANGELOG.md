@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Custom icon support for banner notifications. New flag `--icon`, configuration key `banner.icon`, and `NOTI_BANNER_ICON` environment variable. Supported on Linux (freedesktop `AppIcon`) and Windows (`Icon`).
+* Annotated example configuration covering every service in `docs/noti.example.yaml`.
 
 ### Changed
 
@@ -21,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * macOS banner notifications work again on Ventura and later. Apple removed `NSUserNotification` in macOS 13, which caused banners to fail silently; they are now sent via `osascript display notification`.
 * ntfy requests no longer include `URL` and `Token` in the JSON body, which some ntfy servers rejected with a 400 "request body must be valid JSON".
+* Man pages and `docs/noti.md` now document the Blink(1) service: the `-x, --blink1` flag, `blink1.*` configuration keys, and `NOTI_BLINK1_*` environment variables were missing.
+* `make man` works on macOS: the recipe used GNU-only `mkdir --parents`, which BSD mkdir rejects.
 
 ## [3.8.2] - 2025-09-12
 

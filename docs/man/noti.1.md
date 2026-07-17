@@ -33,6 +33,10 @@ when it's done. You can receive messages on your computer or phone.
   freedesktop icon theme name. Not supported on macOS. On Windows, accepts
   an .ico file path.
 
+-x, \--blink1
+: Trigger a Blink(1) LED notification. This requires `blink1-tool` to be
+  installed and available in PATH, or `blink1.path` to be set.
+
 -s, \--speech
 : Trigger a speech notification. This will be either `say`, `espeak`, or
   `speechsynthesizer` notification, depending on the OS.
@@ -103,6 +107,14 @@ set the corresponding key. See **CONFIGURATION** in **noti.yaml**(5).
 * `NOTI_SAY_VOICE`
 * `NOTI_ESPEAK_VOICENAME`
 * `NOTI_SPEECHSYNTHESIZER_VOICE`
+* `NOTI_BLINK1_BRIGHTNESS`
+* `NOTI_BLINK1_COLOR`
+* `NOTI_BLINK1_DELAY`
+* `NOTI_BLINK1_FADETIME`
+* `NOTI_BLINK1_GLIMMER`
+* `NOTI_BLINK1_PATH`
+* `NOTI_BLINK1_RANDOM`
+* `NOTI_BLINK1_REPEATS`
 * `NOTI_BEARYCHAT_INCOMINGHOOKURI`
 * `NOTI_KEYBASE_CONVERSATION`
 * `NOTI_KEYBASE_CHANNEL`

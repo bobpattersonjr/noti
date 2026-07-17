@@ -168,6 +168,14 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 * `NOTI_SAY_VOICE`
 * `NOTI_ESPEAK_VOICENAME`
 * `NOTI_SPEECHSYNTHESIZER_VOICE`
+* `NOTI_BLINK1_BRIGHTNESS`
+* `NOTI_BLINK1_COLOR`
+* `NOTI_BLINK1_DELAY`
+* `NOTI_BLINK1_FADETIME`
+* `NOTI_BLINK1_GLIMMER`
+* `NOTI_BLINK1_PATH`
+* `NOTI_BLINK1_RANDOM`
+* `NOTI_BLINK1_REPEATS`
 * `NOTI_BEARYCHAT_INCOMINGHOOKURI`
 * `NOTI_KEYBASE_CONVERSATION`
 * `NOTI_KEYBASE_CHANNEL`
@@ -226,6 +234,9 @@ A key set in the configuration file overrides the corresponding `NOTI_*`
 environment variable. Precedence applies per key: environment variables still
 take effect for keys the file does not set. Command line flags override both.
 
+A complete annotated example covering every service is provided in
+[noti.example.yaml](noti.example.yaml).
+
 ## Configuration
 
 ```
@@ -262,6 +273,33 @@ SPEECHSYNTHESIZER
 
 voice
     Name of voice used for speech notifications.
+
+BLINK1
+
+path
+    Path to the blink1-tool executable, or a bare name found on PATH.
+    Default is blink1-tool.
+
+color
+    LED color as an RRGGBB hex string. Default is FF0000.
+
+brightness
+    Brightness from 0 to 255. 0 uses the device default.
+
+delay
+    Milliseconds to wait between blinks.
+
+fade
+    Milliseconds to fade between colors.
+
+glimmer
+    Glimmer the LED the given number of times.
+
+random
+    Use a random color on each blink. Set to 1 to enable.
+
+repeats
+    Number of times to repeat the blink pattern. Default is 3.
 
 BEARYCHAT
 

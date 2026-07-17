@@ -52,10 +52,10 @@ out/noti$(tag).darwin-arm64.tar.gz: out/noti.darwin.arm64.rel
 	  rm -rf $$tmpdir
 
 docs/man/dist/noti.1: docs/man/noti.1.md
-	mkdir --parents $(dir $@)
+	mkdir -p $(dir $@)
 	pandoc -s -t man $< -o $@
 docs/man/dist/noti.yaml.5: docs/man/noti.yaml.5.md
-	mkdir --parents $(dir $@)
+	mkdir -p $(dir $@)
 	pandoc -s -t man $< -o $@
 
 .PHONY: build
