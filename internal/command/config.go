@@ -15,14 +15,18 @@ import (
 // Configuration Precedence
 // * viper.Set
 // * flag
-// * env
 // * file
+// * env
 // * defaults
+//
+// The file outranks env, which viper does not do on its own. See bindNotiEnv.
 
 var baseDefaults = map[string]interface{}{
 	"defaults": []string{"banner"},
 	"message":  "Done!",
 	"time":     false,
+
+	"banner.icon": "",
 
 	"nsuser.soundName":     "Ping",
 	"nsuser.soundNameFail": "Basso",
@@ -107,6 +111,8 @@ func setNotiDefaults(v *viper.Viper) {
 }
 
 var keyEnvBindings = map[string]string{
+	"banner.icon": "NOTI_BANNER_ICON",
+
 	"nsuser.soundName":     "NOTI_NSUSER_SOUNDNAME",
 	"nsuser.soundNameFail": "NOTI_NSUSER_SOUNDNAMEFAIL",
 
@@ -199,8 +205,15 @@ var keyEnvBindingsDeprecated = map[string]string{
 	"NOTI_SLACK_CHANNEL":             "NOTI_SLACK_DEST",
 }
 
+// bindNotiEnv binds NOTI_* environment variables to config keys. It must run
+// after the config file is loaded: viper ranks env above config and the order
+// is fixed, so leaving a key unbound is the only way to let the file win.
 func bindNotiEnv(v *viper.Viper) error {
 	for key, val := range keyEnvBindings {
+		if v.InConfig(key) {
+			continue
+		}
+
 		if err := v.BindEnv(key, val); err != nil {
 			return err
 		}
@@ -269,10 +282,6 @@ func setupConfigFile(fileFlag string, v *viper.Viper) error {
 func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
 	setNotiDefaults(v)
 
-	if err := bindNotiEnv(v); err != nil {
-		return err
-	}
-
 	// Don't care about this error, fileFlag can be blank.
 	fileFlag, _ := flags.GetString("file")
 	if err := setupConfigFile(fileFlag, v); err != nil {
@@ -280,8 +289,18 @@ func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
 		vbsPrintln(err)
 	}
 
+	// Must come after the config file is read, so that keys defined in the
+	// file are left unbound and the file's values win over the environment.
+	if err := bindNotiEnv(v); err != nil {
+		return err
+	}
+
 	if flags == nil {
 		return nil
+	}
+
+	if err := v.BindPFlag("banner.icon", flags.Lookup("icon")); err != nil {
+		return err
 	}
 
 	return v.BindPFlag("message", flags.Lookup("message"))

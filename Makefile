@@ -25,11 +25,8 @@ vendor: go.mod go.sum
 out/noti: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && go build -o ../../$@ $(ld_flags_dev)
 
-out/noti.darwin.rel: go.mod go.sum vendor $(go_src)
-	cd cmd/noti && GOOS=darwin GOARCH=amd64 \
-		go build -o ../../$@ $(ld_flags_rel)
 out/noti.darwin.arm64.rel: go.mod go.sum vendor $(go_src)
-	cd cmd/noti && GOOS=darwin GOARCH=arm64 \
+	cd cmd/noti && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 \
 		go build -o ../../$@ $(ld_flags_rel)
 out/noti.%.rel: go.mod go.sum vendor $(go_src)
 	cd cmd/noti && CGO_ENABLED=0 GOOS=$* GOARCH=amd64 \
@@ -55,10 +52,10 @@ out/noti$(tag).darwin-arm64.tar.gz: out/noti.darwin.arm64.rel
 	  rm -rf $$tmpdir
 
 docs/man/dist/noti.1: docs/man/noti.1.md
-	mkdir --parents $(dir $@)
+	mkdir -p $(dir $@)
 	pandoc -s -t man $< -o $@
 docs/man/dist/noti.yaml.5: docs/man/noti.yaml.5.md
-	mkdir --parents $(dir $@)
+	mkdir -p $(dir $@)
 	pandoc -s -t man $< -o $@
 
 .PHONY: build

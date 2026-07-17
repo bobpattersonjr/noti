@@ -80,8 +80,14 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
     this service, set this flag to false.  This will be either nsuser,
     freedesktop, or notifyicon notification, depending on the OS.
 
+--icon <string>
+    Path to notification icon image. On Linux, accepts an image path or a
+    freedesktop icon theme name. On Windows, accepts an .ico file path. Not
+    supported on macOS, where notifications are sent via osascript.
+
 -x, --blink1
     Trigger a Blink(1) LED notification. Requires `blink1-tool` installed and available in PATH (or set `blink1.path`).
+
 
 -s, --speech
     Trigger a speech notification.  This will be either say, espeak, or
@@ -156,11 +162,20 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 ## Environment
 
 * `NOTI_DEFAULT`
+* `NOTI_BANNER_ICON`
 * `NOTI_NSUSER_SOUNDNAME`
 * `NOTI_NSUSER_SOUNDNAMEFAIL`
 * `NOTI_SAY_VOICE`
 * `NOTI_ESPEAK_VOICENAME`
 * `NOTI_SPEECHSYNTHESIZER_VOICE`
+* `NOTI_BLINK1_BRIGHTNESS`
+* `NOTI_BLINK1_COLOR`
+* `NOTI_BLINK1_DELAY`
+* `NOTI_BLINK1_FADETIME`
+* `NOTI_BLINK1_GLIMMER`
+* `NOTI_BLINK1_PATH`
+* `NOTI_BLINK1_RANDOM`
+* `NOTI_BLINK1_REPEATS`
 * `NOTI_BEARYCHAT_INCOMINGHOOKURI`
 * `NOTI_KEYBASE_CONVERSATION`
 * `NOTI_KEYBASE_CHANNEL`
@@ -207,9 +222,31 @@ in the following order.
 If `$XDG_CONFIG_HOME` is empty, then `$HOME/.config` will be used as its default
 value and `noti` will check `$HOME/.config/noti/noti.yaml`.
 
+Settings are resolved in the following order, from highest precedence to
+lowest.
+
+1. Command line flags
+2. Configuration file
+3. Environment variables
+4. Built-in defaults
+
+A key set in the configuration file overrides the corresponding `NOTI_*`
+environment variable. Precedence applies per key: environment variables still
+take effect for keys the file does not set. Command line flags override both.
+
+A complete annotated example covering every service is provided in
+[noti.example.yaml](noti.example.yaml).
+
 ## Configuration
 
 ```
+BANNER
+
+icon
+    Path to notification icon image. On Linux, accepts an image path or a
+    freedesktop icon theme name. On Windows, accepts an .ico file path. Not
+    supported on macOS, where notifications are sent via osascript.
+
 NSUSER
 
 soundName
@@ -236,6 +273,33 @@ SPEECHSYNTHESIZER
 
 voice
     Name of voice used for speech notifications.
+
+BLINK1
+
+path
+    Path to the blink1-tool executable, or a bare name found on PATH.
+    Default is blink1-tool.
+
+color
+    LED color as an RRGGBB hex string. Default is FF0000.
+
+brightness
+    Brightness from 0 to 255. 0 uses the device default.
+
+delay
+    Milliseconds to wait between blinks.
+
+fade
+    Milliseconds to fade between colors.
+
+glimmer
+    Glimmer the LED the given number of times.
+
+random
+    Use a random color on each blink. Set to 1 to enable.
+
+repeats
+    Number of times to repeat the blink pattern. Default is 3.
 
 BEARYCHAT
 
@@ -408,6 +472,8 @@ rsync -az --stats ~/  server:/backups/homedir | noti -t "backup stats" -m -
 Sample configuration file.
 
 ```yaml
+banner:
+  icon: /path/to/icon.png
 nsuser:
   soundName: Ping
   soundNameFail: Basso

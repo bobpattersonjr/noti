@@ -14,6 +14,7 @@ func getBanner(title, message string, v *viper.Viper) notification {
 		BalloonTipTitle: title,
 		BalloonTipText:  message,
 		BalloonTipIcon:  notifyicon.BalloonTipIconInfo,
+		Icon:            v.GetString("banner.icon"),
 	}
 }
 

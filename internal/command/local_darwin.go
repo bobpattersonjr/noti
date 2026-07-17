@@ -13,6 +13,7 @@ func getBanner(title, message string, v *viper.Viper) notification {
 	return &nsuser.Notification{
 		Title:           title,
 		InformativeText: message,
+		ContentImage:    v.GetString("banner.icon"),
 		SoundName:       v.GetString("nsuser.soundName"),
 	}
 }

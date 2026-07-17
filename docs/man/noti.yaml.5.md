@@ -23,6 +23,28 @@ in the following order.
 If $XDG_CONFIG_HOME is empty, then $HOME/.config will be used as its default
 value and noti will check $HOME/.config/noti/noti.yaml.
 
+Settings are resolved in the following order, from highest precedence to
+lowest.
+
+1. Command line flags
+2. This configuration file
+3. Environment variables
+4. Built-in defaults
+
+A key set in this file overrides the corresponding `NOTI_*` environment
+variable. Precedence applies per key: environment variables still take effect
+for keys this file does not set. Command line flags override both.
+
+A complete annotated example covering every service is provided in
+docs/noti.example.yaml in the noti source distribution.
+
+# BANNER
+
+icon
+: Path to notification icon image. On Linux, accepts an image path or a
+  freedesktop icon theme name. Not supported on macOS. On Windows, accepts
+  an .ico file path.
+
 # NSUSER
 
 soundName
@@ -49,6 +71,33 @@ voiceName
 
 voice
 : Name of voice used for speech notifications.
+
+# BLINK1
+
+path
+: Path to the blink1-tool executable, or a bare name found on PATH.
+  Default is blink1-tool.
+
+color
+: LED color as an RRGGBB hex string. Default is FF0000.
+
+brightness
+: Brightness from 0 to 255. 0 uses the device default.
+
+delay
+: Milliseconds to wait between blinks.
+
+fade
+: Milliseconds to fade between colors.
+
+glimmer
+: Glimmer the LED the given number of times.
+
+random
+: Use a random color on each blink. Set to 1 to enable.
+
+repeats
+: Number of times to repeat the blink pattern. Default is 3.
 
 # BEARYCHAT
 
@@ -143,6 +192,8 @@ template
 # EXAMPLES
 
     ---
+    banner:
+      icon: /path/to/icon.png
     nsuser:
       soundName: Ping
       soundNameFail: Basso
@@ -152,6 +203,9 @@ template
       voiceName: english-us
     speechsynthesizer:
       voice: Microsoft David Desktop
+    blink1:
+      color: 00FF00
+      repeats: 3
     bearychat:
       incomingHookURI: 1234567890abcdefg
     keybase:
