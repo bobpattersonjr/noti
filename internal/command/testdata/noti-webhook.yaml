@@ -1,0 +1,5 @@
+---
+webhook:
+  url: https://example.com/file
+  headers:
+    X-From-File: "yes"

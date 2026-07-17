@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Custom icon support for banner notifications. New flag `--icon`, configuration key `banner.icon`, and `NOTI_BANNER_ICON` environment variable. Supported on Linux (freedesktop `AppIcon`) and Windows (`Icon`).
 * Annotated example configuration covering every service in `docs/noti.example.yaml`.
+* Generic webhook service. New flag `--webhook`, configuration keys under `webhook.*`, `NOTI_WEBHOOK_*` environment variables, and a top-level `webhooks` list for sending to multiple endpoints. When the content type is JSON, the title and message are JSON-escaped before template substitution, so quotes and newlines can't corrupt the payload.
 
 ### Changed
 

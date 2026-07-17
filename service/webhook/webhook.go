@@ -2,12 +2,13 @@ package webhook
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"strings"
+	"text/template"
 )
 
 // Notification is a generic Webhook notification.
@@ -47,16 +48,27 @@ func (n *Notification) Send() error {
 		method = http.MethodPost
 	}
 
+	ctype := n.contentType()
+
 	var body io.Reader
 	if n.Template != "" && method != http.MethodGet && method != http.MethodHead {
 		t, err := template.New("webhook").Parse(n.Template)
 		if err != nil {
 			return fmt.Errorf("webhook: parse template: %w", err)
 		}
+
+		title, message := n.Title, n.Message
+		// For JSON payloads, escape the values so a quote or newline in the
+		// title or message can't produce an invalid body.
+		if isJSON(ctype) {
+			title = jsonEscape(title)
+			message = jsonEscape(message)
+		}
+
 		buf := &bytes.Buffer{}
 		if err := t.Execute(buf, map[string]string{
-			"title":   n.Title,
-			"message": n.Message,
+			"title":   title,
+			"message": message,
 		}); err != nil {
 			return fmt.Errorf("webhook: execute template: %w", err)
 		}
@@ -78,10 +90,6 @@ func (n *Notification) Send() error {
 
 	// Set Content-Type if we have a body and no explicit header already.
 	if body != nil && req.Header.Get("Content-Type") == "" {
-		ctype := n.ContentType
-		if strings.TrimSpace(ctype) == "" {
-			ctype = "application/json"
-		}
 		req.Header.Set("Content-Type", ctype)
 	}
 
@@ -97,4 +105,33 @@ func (n *Notification) Send() error {
 	}
 
 	return nil
+}
+
+// contentType resolves the effective Content-Type: an explicit header wins,
+// then the ContentType field, then application/json.
+func (n *Notification) contentType() string {
+	for k, v := range n.Headers {
+		if strings.EqualFold(k, "Content-Type") {
+			return v
+		}
+	}
+	if ct := strings.TrimSpace(n.ContentType); ct != "" {
+		return ct
+	}
+	return "application/json"
+}
+
+func isJSON(contentType string) bool {
+	ct := strings.ToLower(contentType)
+	return strings.Contains(ct, "application/json") || strings.HasSuffix(strings.SplitN(ct, ";", 2)[0], "+json")
+}
+
+// jsonEscape returns s escaped for embedding inside a JSON string literal,
+// without the surrounding quotes.
+func jsonEscape(s string) string {
+	b, err := json.Marshal(s)
+	if err != nil {
+		return s
+	}
+	return string(b[1 : len(b)-1])
 }
