@@ -9,6 +9,32 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TestMain points XDG_CONFIG_HOME at an empty directory so that a real
+// noti.yaml on the machine running the tests can't leak into them.
+// setupConfigFile falls back to $XDG_CONFIG_HOME/noti/noti.yaml, and since
+// the config file outranks the environment, such a file would otherwise
+// override the env vars these tests set.
+func TestMain(m *testing.M) {
+	dir, err := os.MkdirTemp("", "noti-test-config")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create temp config dir:", err)
+		os.Exit(1)
+	}
+
+	if err := os.Setenv("XDG_CONFIG_HOME", dir); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to set XDG_CONFIG_HOME:", err)
+		os.Exit(1)
+	}
+
+	code := m.Run()
+
+	if err := os.RemoveAll(dir); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to remove temp config dir:", err)
+	}
+
+	os.Exit(code)
+}
+
 func countSettingsKeys(t *testing.T, m map[string]interface{}) int {
 	t.Helper()
 

@@ -15,9 +15,11 @@ import (
 // Configuration Precedence
 // * viper.Set
 // * flag
-// * env
 // * file
+// * env
 // * defaults
+//
+// The file outranks env, which viper does not do on its own. See bindNotiEnv.
 
 var baseDefaults = map[string]interface{}{
 	"defaults": []string{"banner"},
