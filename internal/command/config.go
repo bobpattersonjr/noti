@@ -15,14 +15,18 @@ import (
 // Configuration Precedence
 // * viper.Set
 // * flag
-// * env
 // * file
+// * env
 // * defaults
+//
+// The file outranks env, which viper does not do on its own. See bindNotiEnv.
 
 var baseDefaults = map[string]interface{}{
 	"defaults": []string{"banner"},
 	"message":  "Done!",
 	"time":     false,
+
+	"banner.icon": "",
 
 	"nsuser.soundName":     "Ping",
 	"nsuser.soundNameFail": "Basso",
@@ -117,6 +121,8 @@ func setNotiDefaults(v *viper.Viper) {
 }
 
 var keyEnvBindings = map[string]string{
+	"banner.icon": "NOTI_BANNER_ICON",
+
 	"nsuser.soundName":     "NOTI_NSUSER_SOUNDNAME",
 	"nsuser.soundNameFail": "NOTI_NSUSER_SOUNDNAMEFAIL",
 
@@ -215,8 +221,15 @@ var keyEnvBindingsDeprecated = map[string]string{
 	"NOTI_SLACK_CHANNEL":             "NOTI_SLACK_DEST",
 }
 
+// bindNotiEnv binds NOTI_* environment variables to config keys. It must run
+// after the config file is loaded: viper ranks env above config and the order
+// is fixed, so leaving a key unbound is the only way to let the file win.
 func bindNotiEnv(v *viper.Viper) error {
 	for key, val := range keyEnvBindings {
+		if v.InConfig(key) {
+			continue
+		}
+
 		if err := v.BindEnv(key, val); err != nil {
 			return err
 		}
@@ -283,46 +296,53 @@ func setupConfigFile(fileFlag string, v *viper.Viper) error {
 
 // configureApp merges together different configuration sources.
 func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
-    setNotiDefaults(v)
+	setNotiDefaults(v)
 
-    if err := bindNotiEnv(v); err != nil {
-        return err
-    }
-
-    // Parse NOTI_WEBHOOK_HEADERS (e.g., "K=V,K2=V2") into webhook.headers map.
-    if hdr := os.Getenv("NOTI_WEBHOOK_HEADERS"); hdr != "" {
-        headers := make(map[string]string)
-        parts := strings.Split(hdr, ",")
-        for _, p := range parts {
-            p = strings.TrimSpace(p)
-            if p == "" {
-                continue
-            }
-            kv := strings.SplitN(p, "=", 2)
-            if len(kv) != 2 {
-                continue
-            }
-            k := strings.TrimSpace(kv[0])
-            vval := strings.TrimSpace(kv[1])
-            if k == "" {
-                continue
-            }
-            headers[k] = vval
-        }
-        if len(headers) > 0 {
-            v.Set("webhook.headers", headers)
-        }
-    }
-
-    // Don't care about this error, fileFlag can be blank.
+	// Don't care about this error, fileFlag can be blank.
 	fileFlag, _ := flags.GetString("file")
 	if err := setupConfigFile(fileFlag, v); err != nil {
 		// Not the end of the world if we can't read the config file.
 		vbsPrintln(err)
 	}
 
+	// Must come after the config file is read, so that keys defined in the
+	// file are left unbound and the file's values win over the environment.
+	if err := bindNotiEnv(v); err != nil {
+		return err
+	}
+
+	// Parse NOTI_WEBHOOK_HEADERS (e.g., "K=V,K2=V2") into webhook.headers.
+	// BindEnv can't produce a map, so this uses v.Set, which sits above the
+	// config file in viper's ordering — skip it when the file sets the key,
+	// to keep the file-over-env guarantee.
+	if hdr := os.Getenv("NOTI_WEBHOOK_HEADERS"); hdr != "" && !v.InConfig("webhook.headers") {
+		headers := make(map[string]string)
+		for _, p := range strings.Split(hdr, ",") {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			kv := strings.SplitN(p, "=", 2)
+			if len(kv) != 2 {
+				continue
+			}
+			k := strings.TrimSpace(kv[0])
+			if k == "" {
+				continue
+			}
+			headers[k] = strings.TrimSpace(kv[1])
+		}
+		if len(headers) > 0 {
+			v.Set("webhook.headers", headers)
+		}
+	}
+
 	if flags == nil {
 		return nil
+	}
+
+	if err := v.BindPFlag("banner.icon", flags.Lookup("icon")); err != nil {
+		return err
 	}
 
 	return v.BindPFlag("message", flags.Lookup("message"))
@@ -332,27 +352,27 @@ func enabledFromSlice(defaults []string) map[string]bool {
 	// defaults should come from viper, which should  have processed baseDefaults
 	// and config file values.
 
-    services := map[string]bool{
-        "banner":     false,
-        "bearychat":  false,
-        "blink1":     false,
-        "keybase":    false,
-        "pushbullet": false,
-        "pushover":   false,
-        "pushsafer":  false,
-        "simplepush": false,
-        "slack":      false,
-        "gchat":      false,
-        "speech":     false,
-        "mattermost": false,
-        "telegram":   false,
-        "zulip":      false,
-        "twilio":     false,
-        "chanify":    false,
-        "ntfy":       false,
-        "bark":       false,
-        "webhook":    false,
-    }
+	services := map[string]bool{
+		"banner":     false,
+		"bearychat":  false,
+		"blink1":     false,
+		"keybase":    false,
+		"pushbullet": false,
+		"pushover":   false,
+		"pushsafer":  false,
+		"simplepush": false,
+		"slack":      false,
+		"gchat":      false,
+		"speech":     false,
+		"mattermost": false,
+		"telegram":   false,
+		"zulip":      false,
+		"twilio":     false,
+		"chanify":    false,
+		"ntfy":       false,
+		"bark":       false,
+		"webhook":    false,
+	}
 
 	for _, name := range defaults {
 		// Check if name is in services to avoid bad names from getting added
@@ -366,27 +386,27 @@ func enabledFromSlice(defaults []string) map[string]bool {
 }
 
 func hasServiceFlags(flags *pflag.FlagSet) bool {
-    services := map[string]bool{
-        "banner":     false,
-        "bearychat":  false,
-        "blink1":     false,
-        "keybase":    false,
-        "pushbullet": false,
-        "pushover":   false,
-        "pushsafer":  false,
-        "simplepush": false,
-        "slack":      false,
-        "gchat":      false,
-        "speech":     false,
-        "mattermost": false,
-        "telegram":   false,
-        "zulip":      false,
-        "twilio":     false,
-        "chanify":    false,
-        "ntfy":       false,
-        "bark":       false,
-        "webhook":    false,
-    }
+	services := map[string]bool{
+		"banner":     false,
+		"bearychat":  false,
+		"blink1":     false,
+		"keybase":    false,
+		"pushbullet": false,
+		"pushover":   false,
+		"pushsafer":  false,
+		"simplepush": false,
+		"slack":      false,
+		"gchat":      false,
+		"speech":     false,
+		"mattermost": false,
+		"telegram":   false,
+		"zulip":      false,
+		"twilio":     false,
+		"chanify":    false,
+		"ntfy":       false,
+		"bark":       false,
+		"webhook":    false,
+	}
 
 	flags.Visit(func(f *pflag.Flag) {
 		if _, ok := services[f.Name]; ok {
@@ -403,27 +423,27 @@ func hasServiceFlags(flags *pflag.FlagSet) bool {
 }
 
 func enabledFromFlags(flags *pflag.FlagSet) map[string]bool {
-    services := map[string]bool{
-        "banner":     false,
-        "bearychat":  false,
-        "blink1":     false,
-        "keybase":    false,
-        "pushbullet": false,
-        "pushover":   false,
-        "pushsafer":  false,
-        "simplepush": false,
-        "slack":      false,
-        "gchat":      false,
-        "speech":     false,
-        "mattermost": false,
-        "telegram":   false,
-        "zulip":      false,
-        "twilio":     false,
-        "chanify":    false,
-        "ntfy":       false,
-        "bark":       false,
-        "webhook":    false,
-    }
+	services := map[string]bool{
+		"banner":     false,
+		"bearychat":  false,
+		"blink1":     false,
+		"keybase":    false,
+		"pushbullet": false,
+		"pushover":   false,
+		"pushsafer":  false,
+		"simplepush": false,
+		"slack":      false,
+		"gchat":      false,
+		"speech":     false,
+		"mattermost": false,
+		"telegram":   false,
+		"zulip":      false,
+		"twilio":     false,
+		"chanify":    false,
+		"ntfy":       false,
+		"bark":       false,
+		"webhook":    false,
+	}
 
 	// Visit flags that have been set.
 	flags.Visit(func(f *pflag.Flag) {
@@ -539,15 +559,15 @@ func getNotifications(v *viper.Viper, services map[string]struct{}) []notificati
 		notis = append(notis, getNtfy(title, message, v))
 	}
 
-    if _, ok := services["bark"]; ok {
-        notis = append(notis, getBark(title, message, v))
-    }
+	if _, ok := services["bark"]; ok {
+		notis = append(notis, getBark(title, message, v))
+	}
 
-    if _, ok := services["webhook"]; ok {
-        for _, n := range getWebhooks(title, message, v) {
-            notis = append(notis, n)
-        }
-    }
+	if _, ok := services["webhook"]; ok {
+		for _, n := range getWebhooks(title, message, v) {
+			notis = append(notis, n)
+		}
+	}
 
-    return notis
+	return notis
 }

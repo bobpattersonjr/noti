@@ -9,6 +9,32 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TestMain points XDG_CONFIG_HOME at an empty directory so that a real
+// noti.yaml on the machine running the tests can't leak into them.
+// setupConfigFile falls back to $XDG_CONFIG_HOME/noti/noti.yaml, and since
+// the config file outranks the environment, such a file would otherwise
+// override the env vars these tests set.
+func TestMain(m *testing.M) {
+	dir, err := os.MkdirTemp("", "noti-test-config")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create temp config dir:", err)
+		os.Exit(1)
+	}
+
+	if err := os.Setenv("XDG_CONFIG_HOME", dir); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to set XDG_CONFIG_HOME:", err)
+		os.Exit(1)
+	}
+
+	code := m.Run()
+
+	if err := os.RemoveAll(dir); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to remove temp config dir:", err)
+	}
+
+	os.Exit(code)
+}
+
 func countSettingsKeys(t *testing.T, m map[string]interface{}) int {
 	t.Helper()
 
@@ -26,6 +52,11 @@ func countSettingsKeys(t *testing.T, m map[string]interface{}) int {
 
 		if _, ok := v.([]string); ok {
 			// v is just a string key.
+			keys++
+		}
+
+		if _, ok := v.([]interface{}); ok {
+			// v is just a list key.
 			keys++
 		}
 
@@ -162,6 +193,7 @@ func TestConfigureApp(t *testing.T) {
 		name       string
 		configFile string
 		env        string
+		envValue   string
 		want       string
 	}{
 		{
@@ -171,11 +203,20 @@ func TestConfigureApp(t *testing.T) {
 			want:       "testSoundName",
 		},
 		{
-			// Env should take precedence.
+			// Config file should take precedence over env.
 			name:       "defaults, file, and env",
 			configFile: "testdata/noti.yaml",
 			env:        "NOTI_NSUSER_SOUNDNAME",
+			envValue:   "envSoundName",
 			want:       "testSoundName",
+		},
+		{
+			// Env should take precedence over defaults when the file
+			// doesn't set the key.
+			name:     "defaults and env",
+			env:      "NOTI_NSUSER_SOUNDNAME",
+			envValue: "envSoundName",
+			want:     "envSoundName",
 		},
 		{
 			// Defaults should take precedence.
@@ -199,7 +240,7 @@ func TestConfigureApp(t *testing.T) {
 				flags.Set("file", c.configFile)
 			}
 			if c.env != "" {
-				if err := os.Setenv(c.env, c.want); err != nil {
+				if err := os.Setenv(c.env, c.envValue); err != nil {
 					t.Errorf("Failed to set env: %s", err)
 				}
 			}
@@ -213,6 +254,89 @@ func TestConfigureApp(t *testing.T) {
 				t.Error("Unexpected config value")
 				t.Errorf("have=%s; want=%s", have, c.want)
 				t.Error("nsuser:", v.Sub("nsuser").AllSettings())
+			}
+		})
+	}
+}
+
+// TestConfigFilePrecedence pins the ordering that noti guarantees:
+// flags beat the config file, and the config file beats the environment.
+func TestConfigFilePrecedence(t *testing.T) {
+	orig := getNotiEnv(t)
+	defer setNotiEnv(t, orig)
+
+	cases := []struct {
+		name     string
+		key      string
+		env      string
+		envValue string
+		flag     string
+		flagVal  string
+		want     string
+	}{
+		{
+			name:     "file beats env",
+			key:      "nsuser.soundName",
+			env:      "NOTI_NSUSER_SOUNDNAME",
+			envValue: "envSoundName",
+			want:     "fileSoundName",
+		},
+		{
+			name:     "file beats env for banner.icon",
+			key:      "banner.icon",
+			env:      "NOTI_BANNER_ICON",
+			envValue: "/env/icon.png",
+			want:     "/file/icon.png",
+		},
+		{
+			name:    "flag beats file",
+			key:     "banner.icon",
+			flag:    "icon",
+			flagVal: "/flag/icon.png",
+			want:    "/flag/icon.png",
+		},
+		{
+			name:     "flag beats file and env",
+			key:      "banner.icon",
+			env:      "NOTI_BANNER_ICON",
+			envValue: "/env/icon.png",
+			flag:     "icon",
+			flagVal:  "/flag/icon.png",
+			want:     "/flag/icon.png",
+		},
+	}
+
+	for _, c := range cases {
+		// Pin case scope.
+		c := c
+
+		t.Run(c.name, func(t *testing.T) {
+			clearNotiEnv(t)
+
+			v := viper.New()
+			flags := pflag.NewFlagSet("testconfigfileprecedence", pflag.ContinueOnError)
+			InitFlags(flags)
+
+			if err := flags.Set("file", "testdata/noti-precedence.yaml"); err != nil {
+				t.Fatalf("Failed to set file flag: %s", err)
+			}
+			if c.env != "" {
+				if err := os.Setenv(c.env, c.envValue); err != nil {
+					t.Fatalf("Failed to set env: %s", err)
+				}
+			}
+			if c.flag != "" {
+				if err := flags.Set(c.flag, c.flagVal); err != nil {
+					t.Fatalf("Failed to set flag: %s", err)
+				}
+			}
+
+			if err := configureApp(v, flags); err != nil {
+				t.Fatal(err)
+			}
+
+			if have := v.GetString(c.key); have != c.want {
+				t.Errorf("%s: have=%s; want=%s", c.key, have, c.want)
 			}
 		})
 	}
@@ -334,6 +458,90 @@ func TestEnabledServices(t *testing.T) {
 		if have != want {
 			t.Error("Unexpected enabled state")
 			t.Errorf("have=%t; want=%t", have, want)
+		}
+	})
+}
+
+func TestBannerIconConfig(t *testing.T) {
+	orig := getNotiEnv(t)
+	defer setNotiEnv(t, orig)
+
+	t.Run("default is empty", func(t *testing.T) {
+		clearNotiEnv(t)
+
+		v := viper.New()
+		flags := pflag.NewFlagSet("testbannericon", pflag.ContinueOnError)
+		InitFlags(flags)
+
+		if err := configureApp(v, flags); err != nil {
+			t.Error(err)
+		}
+
+		have := v.GetString("banner.icon")
+		if have != "" {
+			t.Errorf("have=%q; want=%q", have, "")
+		}
+	})
+
+	t.Run("env var", func(t *testing.T) {
+		clearNotiEnv(t)
+
+		const want = "/tmp/icon.png"
+		os.Setenv("NOTI_BANNER_ICON", want)
+		defer os.Unsetenv("NOTI_BANNER_ICON")
+
+		v := viper.New()
+		flags := pflag.NewFlagSet("testbannericon", pflag.ContinueOnError)
+		InitFlags(flags)
+
+		if err := configureApp(v, flags); err != nil {
+			t.Error(err)
+		}
+
+		have := v.GetString("banner.icon")
+		if have != want {
+			t.Errorf("have=%q; want=%q", have, want)
+		}
+	})
+
+	t.Run("flag", func(t *testing.T) {
+		clearNotiEnv(t)
+
+		const want = "/tmp/flag-icon.png"
+		v := viper.New()
+		flags := pflag.NewFlagSet("testbannericon", pflag.ContinueOnError)
+		InitFlags(flags)
+		flags.Set("icon", want)
+
+		if err := configureApp(v, flags); err != nil {
+			t.Error(err)
+		}
+
+		have := v.GetString("banner.icon")
+		if have != want {
+			t.Errorf("have=%q; want=%q", have, want)
+		}
+	})
+
+	t.Run("flag overrides env", func(t *testing.T) {
+		clearNotiEnv(t)
+
+		const want = "/tmp/flag-wins.png"
+		os.Setenv("NOTI_BANNER_ICON", "/tmp/env-loses.png")
+		defer os.Unsetenv("NOTI_BANNER_ICON")
+
+		v := viper.New()
+		flags := pflag.NewFlagSet("testbannericon", pflag.ContinueOnError)
+		InitFlags(flags)
+		flags.Set("icon", want)
+
+		if err := configureApp(v, flags); err != nil {
+			t.Error(err)
+		}
+
+		have := v.GetString("banner.icon")
+		if have != want {
+			t.Errorf("have=%q; want=%q", have, want)
 		}
 	})
 }
