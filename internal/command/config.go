@@ -564,9 +564,7 @@ func getNotifications(v *viper.Viper, services map[string]struct{}) []notificati
 	}
 
 	if _, ok := services["webhook"]; ok {
-		for _, n := range getWebhooks(title, message, v) {
-			notis = append(notis, n)
-		}
+		notis = append(notis, getWebhooks(title, message, v)...)
 	}
 
 	return notis
