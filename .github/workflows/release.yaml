@@ -65,8 +65,10 @@ jobs:
 
   build-darwin:
     name: Build macOS (darwin amd64)
-    # Use Intel runner so CGO works with import "C" when targeting amd64
-    runs-on: macos-13
+    # macos-13 (the last free Intel runner) is retired. All builds are pure Go
+    # since the osascript banner change (#168) removed cgo, so amd64
+    # cross-compiles fine on the arm64 runner.
+    runs-on: macos-14
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -79,9 +81,9 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Build release tarball (darwin)
+      - name: Build release tarball (darwin amd64)
         run: |
-          make release-darwin
+          make release-darwin-amd64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -133,6 +133,9 @@ release-no-cgo: out/noti$(tag).linux-amd64.tar.gz out/noti$(tag).windows-amd64.t
 .PHONY: release-darwin
 release-darwin: out/noti$(tag).darwin-amd64.tar.gz out/noti$(tag).darwin-arm64.tar.gz
 
+.PHONY: release-darwin-amd64
+release-darwin-amd64: out/noti$(tag).darwin-amd64.tar.gz
+
 .PHONY: release-darwin-arm64
 release-darwin-arm64: out/noti$(tag).darwin-arm64.tar.gz
 
