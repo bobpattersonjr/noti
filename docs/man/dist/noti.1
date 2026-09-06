@@ -95,6 +95,16 @@ server.
 For private Ntfy topics, access token authentication can be provided via
 \f[CR]ntfy.token\f[R].
 .TP
+\(enwebhook
+Trigger a generic Webhook notification.
+This requires \f[CR]webhook.url\f[R] to be set.
+Optionally, configure \f[CR]webhook.method\f[R] (default: POST),
+\f[CR]webhook.contentType\f[R] (default: application/json), a
+\f[CR]webhook.template\f[R] for the request body, and
+\f[CR]webhook.headers\f[R] as a key/value map.
+Multiple webhooks can be defined under top\-level \f[CR]webhooks:\f[R];
+all will be sent when the service is enabled.
+.TP
 \-w , \-\-pwatch 
 Monitor a process by PID and trigger a notification when the pid
 disappears.
@@ -190,6 +200,16 @@ See \f[B]CONFIGURATION\f[R] in \f[B]noti.yaml\f[R](5).
 \f[CR]NOTI_TWILIO_ACCOUNTSID\f[R]
 .IP \(bu 2
 \f[CR]NOTI_TWILIO_AUTHTOKEN\f[R]
+.IP \(bu 2
+\f[CR]NOTI_WEBHOOK_URL\f[R]
+.IP \(bu 2
+\f[CR]NOTI_WEBHOOK_METHOD\f[R]
+.IP \(bu 2
+\f[CR]NOTI_WEBHOOK_CONTENTTYPE\f[R]
+.IP \(bu 2
+\f[CR]NOTI_WEBHOOK_TEMPLATE\f[R]
+.IP \(bu 2
+\f[CR]NOTI_WEBHOOK_HEADERS\f[R] (comma\-separated K=V list)
 .SH FILES
 If not explicitly set with \-\-file, then noti will check the following
 paths, in the following order.

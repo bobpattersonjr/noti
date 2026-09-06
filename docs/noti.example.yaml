@@ -202,6 +202,34 @@ zulip:
   # - For "stream": stream name.
   to: ""
 
+webhook:
+  # Destination URL for a generic webhook notification.
+  url: ""
+  # HTTP method. Default is POST. GET and HEAD requests send no body.
+  method: POST
+  # Content-Type header for the request body. Default is application/json.
+  # When it is a JSON type, the title and message are JSON-escaped before
+  # being substituted into the template.
+  contentType: application/json
+  # Go template for the request body. Can reference {{.title}} and
+  # {{.message}}.
+  template: '{"title":"{{.title}}","message":"{{.message}}"}'
+  # Additional HTTP headers as a key/value map. Also settable via
+  # NOTI_WEBHOOK_HEADERS as a comma-separated K=V list.
+  headers: {}
+  #  Authorization: Bearer token123
+
+# Multiple webhooks can be defined as a list under top-level `webhooks`.
+# Each entry accepts the same keys as `webhook` above. When set, all
+# entries are sent; the single `webhook` block above is ignored.
+# webhooks:
+#   - url: https://example.com/hook1
+#     template: '{"text":"{{.title}}: {{.message}}"}'
+#   - url: https://example.com/hook2
+#     method: PUT
+#     headers:
+#       Authorization: Bearer token123
+
 mattermost:
   # Mattermost bot username displayed in the notification. Default is noti.
   username: noti

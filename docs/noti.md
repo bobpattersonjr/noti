@@ -39,6 +39,7 @@ Noti can send notifications on a number of services.
 | Blink(1)   |   ✔   |   ✔   |    ✔    |
 | ntfy       |   ✔   |   ✔   |    ✔    |
 | Bark       |   ✔   |   ✔   |    ✔    |
+| Webhook    |   ✔   |   ✔   |    ✔    |
 
 
 ## Installation
@@ -142,6 +143,13 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
     Trigger a Bark notification.  This requires `bark.key` to be set. Optionally, 
     `bark.apiurl` can also be set to use a different bark server.
 
+--webhook
+    Trigger a generic Webhook notification. This requires `webhook.url` to be set.
+    Optionally, configure `webhook.method` (default: POST), `webhook.contentType`
+    (default: application/json), a `webhook.template` for the request body, and
+    `webhook.headers` as a key/value map. The template can reference `{{.title}}`
+    and `{{.message}}`.
+
 -w , --pwatch
     Monitor a process by PID and trigger a notification when the pid
     disappears.
@@ -209,6 +217,10 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 * `NOTI_CHANIFY_INTERUPTIONLEVEL`
 * `NOTI_BARK_KEY`
 * `NOTI_BARK_APIURL`
+* `NOTI_WEBHOOK_URL`
+* `NOTI_WEBHOOK_METHOD`
+* `NOTI_WEBHOOK_CONTENTTYPE`
+* `NOTI_WEBHOOK_TEMPLATE`
 
 
 ## Files
@@ -527,6 +539,27 @@ ntfy:
 bark:
   url: https://my.bark.url.com
   key: '1234567890abcdefg'
+
+webhook:
+  url: https://example.com/webhook
+  method: POST
+  contentType: application/json
+  template: '{"title":"{{.title}}","message":"{{.message}}"}'
+  headers:
+    X-Custom-Header: abc123
+
+# Or define multiple webhook instances
+webhooks:
+  - url: https://hooks.example.com/one
+    method: POST
+    contentType: application/json
+    template: '{"t":"{{.title}}","m":"{{.message}}"}'
+    headers:
+      Authorization: Bearer abc123
+  - url: https://hooks.example.com/two
+    method: PUT
+    contentType: text/plain
+    template: '{{.title}}: {{.message}}'
 ```
 
 ## Setting up cloud accounts

@@ -102,6 +102,16 @@ var baseDefaults = map[string]interface{}{
 
 	"bark.apiurl": "https://api.day.app/push",
 	"bark.key":    "",
+
+	// Generic webhook defaults
+	"webhook.url":         "",
+	"webhook.method":      "POST",
+	"webhook.contentType": "application/json",
+	"webhook.template":    "{\"title\":\"{{.title}}\",\"message\":\"{{.message}}\"}",
+	"webhook.headers":     map[string]string{},
+
+	// Multiple webhook instances can be defined under top-level `webhooks` as a list.
+	"webhooks": []interface{}{},
 }
 
 func setNotiDefaults(v *viper.Viper) {
@@ -189,6 +199,12 @@ var keyEnvBindings = map[string]string{
 
 	"bark.apiurl": "NOTI_BARK_APIURL",
 	"bark.key":    "NOTI_BARK_KEY",
+
+	// Webhook
+	"webhook.url":         "NOTI_WEBHOOK_URL",
+	"webhook.method":      "NOTI_WEBHOOK_METHOD",
+	"webhook.contentType": "NOTI_WEBHOOK_CONTENTTYPE",
+	"webhook.template":    "NOTI_WEBHOOK_TEMPLATE",
 }
 
 var keyEnvBindingsDeprecated = map[string]string{
@@ -295,6 +311,32 @@ func configureApp(v *viper.Viper, flags *pflag.FlagSet) error {
 		return err
 	}
 
+	// Parse NOTI_WEBHOOK_HEADERS (e.g., "K=V,K2=V2") into webhook.headers.
+	// BindEnv can't produce a map, so this uses v.Set, which sits above the
+	// config file in viper's ordering — skip it when the file sets the key,
+	// to keep the file-over-env guarantee.
+	if hdr := os.Getenv("NOTI_WEBHOOK_HEADERS"); hdr != "" && !v.InConfig("webhook.headers") {
+		headers := make(map[string]string)
+		for _, p := range strings.Split(hdr, ",") {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			kv := strings.SplitN(p, "=", 2)
+			if len(kv) != 2 {
+				continue
+			}
+			k := strings.TrimSpace(kv[0])
+			if k == "" {
+				continue
+			}
+			headers[k] = strings.TrimSpace(kv[1])
+		}
+		if len(headers) > 0 {
+			v.Set("webhook.headers", headers)
+		}
+	}
+
 	if flags == nil {
 		return nil
 	}
@@ -329,6 +371,7 @@ func enabledFromSlice(defaults []string) map[string]bool {
 		"chanify":    false,
 		"ntfy":       false,
 		"bark":       false,
+		"webhook":    false,
 	}
 
 	for _, name := range defaults {
@@ -362,6 +405,7 @@ func hasServiceFlags(flags *pflag.FlagSet) bool {
 		"chanify":    false,
 		"ntfy":       false,
 		"bark":       false,
+		"webhook":    false,
 	}
 
 	flags.Visit(func(f *pflag.Flag) {
@@ -398,6 +442,7 @@ func enabledFromFlags(flags *pflag.FlagSet) map[string]bool {
 		"chanify":    false,
 		"ntfy":       false,
 		"bark":       false,
+		"webhook":    false,
 	}
 
 	// Visit flags that have been set.
@@ -516,6 +561,10 @@ func getNotifications(v *viper.Viper, services map[string]struct{}) []notificati
 
 	if _, ok := services["bark"]; ok {
 		notis = append(notis, getBark(title, message, v))
+	}
+
+	if _, ok := services["webhook"]; ok {
+		notis = append(notis, getWebhooks(title, message, v)...)
 	}
 
 	return notis
