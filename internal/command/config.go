@@ -58,6 +58,11 @@ var baseDefaults = map[string]interface{}{
 
 	"pushover.apiToken": "",
 	"pushover.userKey":  "",
+	"pushover.sound":    "",
+	"pushover.device":   "",
+	"pushover.priority": 0,
+	"pushover.retry":    0,
+	"pushover.expire":   0,
 
 	"pushsafer.key": "",
 
@@ -153,6 +158,11 @@ var keyEnvBindings = map[string]string{
 
 	"pushover.apiToken": "NOTI_PUSHOVER_APITOKEN",
 	"pushover.userKey":  "NOTI_PUSHOVER_USERKEY",
+	"pushover.sound":    "NOTI_PUSHOVER_SOUND",
+	"pushover.device":   "NOTI_PUSHOVER_DEVICE",
+	"pushover.priority": "NOTI_PUSHOVER_PRIORITY",
+	"pushover.retry":    "NOTI_PUSHOVER_RETRY",
+	"pushover.expire":   "NOTI_PUSHOVER_EXPIRE",
 
 	"pushsafer.key": "NOTI_PUSHSAFER_KEY",
 
