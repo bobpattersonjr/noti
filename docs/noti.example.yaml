@@ -105,6 +105,21 @@ pushover:
   apiToken: ""
   # Pushover message destination. Should be your User Key.
   userKey: ""
+  # Notification sound. See https://pushover.net/api#sounds for the list
+  # (e.g. pushover, bike, cosmic, none). Empty uses the device default.
+  sound: ""
+  # Send only to this device name instead of all devices.
+  device: ""
+  # Message priority from -2 (lowest) to 2 (emergency). Default is 0.
+  # Priority 2 repeats the alert until acknowledged and requires retry
+  # and expire to be set.
+  priority: 0
+  # Seconds between emergency re-alerts. Minimum 30. Only used with
+  # priority 2.
+  retry: 0
+  # Seconds until emergency re-alerts stop. Maximum 10800 (3 hours).
+  # Only used with priority 2.
+  expire: 0
 
 pushsafer:
   # Pushsafer private or alias key. Log into your Pushsafer account and note

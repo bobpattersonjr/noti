@@ -33,6 +33,8 @@ type Notification struct {
 	Sound     string
 	Device    string
 	Priority  int // valid values: -2..2
+	Retry     int // seconds between re-alerts; required when Priority is 2
+	Expire    int // seconds until re-alerts stop; required when Priority is 2
 	URL       string
 	URLTitle  string
 	HTML      int // 0 or 1
@@ -45,6 +47,10 @@ type Notification struct {
 func (n *Notification) Send() error {
 	if n.Client == nil {
 		n.Client = http.DefaultClient
+	}
+
+	if n.Priority == 2 && (n.Retry == 0 || n.Expire == 0) {
+		return errors.New("pushover: priority 2 requires retry and expire")
 	}
 
 	vals := make(url.Values)
@@ -62,6 +68,12 @@ func (n *Notification) Send() error {
 	}
 	if n.Priority != 0 {
 		vals.Set("priority", strconv.Itoa(n.Priority))
+	}
+	if n.Retry != 0 {
+		vals.Set("retry", strconv.Itoa(n.Retry))
+	}
+	if n.Expire != 0 {
+		vals.Set("expire", strconv.Itoa(n.Expire))
 	}
 	if n.URL != "" {
 		vals.Set("url", n.URL)

@@ -74,6 +74,11 @@ func getPushover(title, message string, v *viper.Viper) notification {
 		Message:  message,
 		APIToken: v.GetString("pushover.apiToken"),
 		UserKey:  v.GetString("pushover.userKey"),
+		Sound:    v.GetString("pushover.sound"),
+		Device:   v.GetString("pushover.device"),
+		Priority: v.GetInt("pushover.priority"),
+		Retry:    v.GetInt("pushover.retry"),
+		Expire:   v.GetInt("pushover.expire"),
 		Client:   httpClient,
 	}
 }

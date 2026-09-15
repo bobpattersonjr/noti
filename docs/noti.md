@@ -196,6 +196,11 @@ curl -L $(curl -s https://api.github.com/repos/bobpattersonjr/noti/releases/late
 * `NOTI_PUSHBULLET_DEVICEIDEN`
 * `NOTI_PUSHOVER_APITOKEN`
 * `NOTI_PUSHOVER_USERKEY`
+* `NOTI_PUSHOVER_SOUND`
+* `NOTI_PUSHOVER_DEVICE`
+* `NOTI_PUSHOVER_PRIORITY`
+* `NOTI_PUSHOVER_RETRY`
+* `NOTI_PUSHOVER_EXPIRE`
 * `NOTI_PUSHSAFER_KEY`
 * `NOTI_SIMPLEPUSH_KEY`
 * `NOTI_SIMPLEPUSH_EVENT`
@@ -506,6 +511,11 @@ pushbullet:
 pushover:
   userKey: 1234567890abcdefg
   apiToken: 1234567890abcdefg
+  sound: cosmic
+  device: iphone
+  priority: 1
+  retry: 30
+  expire: 3600
 pushsafer:
   key: 1234567890abcdefg
 simplepush:
@@ -587,6 +597,8 @@ Log into your [Pushover] account. Next, look for the "User Key". That's what you
 
 Next [create a new application]. Fill in the fields. Under "Type", select
 "Script". Finally, go to the application page. Look for "API Token/Key". This is what you'll set `pushover.apiToken` to.
+
+Optional settings: `pushover.sound` picks a [notification sound](https://pushover.net/api#sounds); `pushover.device` targets a single device instead of all of them; `pushover.priority` sets the [message priority](https://pushover.net/api#priority) from -2 (lowest) to 2 (emergency). Priority 2 repeats the alert until acknowledged and requires `pushover.retry` (seconds between re-alerts, minimum 30) and `pushover.expire` (seconds until re-alerts stop, maximum 10800).
 
 ### Pushsafer
 

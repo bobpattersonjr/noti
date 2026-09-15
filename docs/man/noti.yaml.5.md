@@ -239,6 +239,11 @@ template
     pushover:
       userKey: 1234567890abcdefg
       apiToken: 1234567890abcdefg
+      sound: cosmic
+      device: iphone
+      priority: 1
+      retry: 30
+      expire: 3600
     pushsafer:
       key: 1234567890abcdefg
     simplepush:
